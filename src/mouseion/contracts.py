@@ -39,6 +39,7 @@ class EventKind(str, Enum):
 
 
 class AgentRole(str, Enum):
+    # --- Generic roles (original ecosystem) ---
     STEM_CELL = "stem_cell"
     RESEARCHER = "researcher"
     CODER = "coder"
@@ -48,6 +49,16 @@ class AgentRole(str, Enum):
     CONNECTOR = "connector"
     INNOVATOR = "innovator"
     GUARDIAN = "guardian"
+
+    # --- Oncology / Medical specialist roles (ExMorbus) ---
+    ONCOLOGIST = "oncologist"           # Treatment-decision synthesis; compassion-driven
+    PATHOLOGIST = "pathologist"         # Histology & IHC analysis; precision-focused
+    CLINICAL_TRIALIST = "clinical_trialist"  # Trial design, eligibility & outcomes
+    GENETICIST = "geneticist"           # Genomic variant interpretation & annotation
+    PHARMACOLOGIST = "pharmacologist"   # Drug safety, interactions & dosing
+    RADIOLOGIST = "radiologist"         # Imaging response (RECIST/iRECIST)
+    PATIENT_ADVOCATE = "patient_advocate"   # Quality-of-life & palliative integration
+    EPIDEMIOLOGIST = "epidemiologist"   # Population-level cohort pattern analysis
 
 
 class ResourceKind(str, Enum):

@@ -116,8 +116,8 @@ class Pathfinder:
             pruned += 1
 
         # 3. Exploratory tendrils — randomly connect nearby agents
-        if agent_ids and self.rng.random() < EXPLORE_PROB:
-            src, dst = self.rng.sample(agent_ids, min(2, len(agent_ids)))
+        if len(agent_ids) >= 2 and self.rng.random() < EXPLORE_PROB:
+            src, dst = self.rng.sample(agent_ids, 2)
             if src != dst:
                 self.ensure_edge(src, dst)
 

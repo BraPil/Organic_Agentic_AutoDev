@@ -68,6 +68,65 @@ ROLE_GENOME_WEIGHTS: dict[AgentRole, dict[str, float]] = {
         "persistence": 0.7,
         "cooperation": 0.6,
     },
+
+    # --- Oncology / Medical specialist roles (ExMorbus) ---
+    AgentRole.ONCOLOGIST: {
+        "compassion": 1.0,
+        "specialisation": 0.9,
+        "persistence": 0.8,
+        "creativity": 0.7,
+        "cooperation": 0.7,
+        "resilience": 0.5,
+    },
+    AgentRole.PATHOLOGIST: {
+        "persistence": 1.0,
+        "specialisation": 1.0,
+        "resilience": 0.6,
+        "risk_tolerance": 0.2,
+        "curiosity": 0.5,
+    },
+    AgentRole.CLINICAL_TRIALIST: {
+        "curiosity": 0.9,
+        "persistence": 0.8,
+        "cooperation": 0.7,
+        "risk_tolerance": 0.5,
+        "creativity": 0.6,
+    },
+    AgentRole.GENETICIST: {
+        "curiosity": 0.9,
+        "specialisation": 0.9,
+        "persistence": 0.8,
+        "creativity": 0.6,
+        "risk_tolerance": 0.4,
+    },
+    AgentRole.PHARMACOLOGIST: {
+        "persistence": 0.9,
+        "resilience": 0.8,
+        "specialisation": 0.7,
+        "risk_tolerance": 0.2,
+        "cooperation": 0.5,
+    },
+    AgentRole.RADIOLOGIST: {
+        "specialisation": 1.0,
+        "persistence": 0.8,
+        "resilience": 0.6,
+        "curiosity": 0.4,
+        "risk_tolerance": 0.2,
+    },
+    AgentRole.PATIENT_ADVOCATE: {
+        "compassion": 1.0,
+        "cooperation": 0.9,
+        "resilience": 0.7,
+        "persistence": 0.7,
+        "creativity": 0.4,
+    },
+    AgentRole.EPIDEMIOLOGIST: {
+        "curiosity": 0.8,
+        "creativity": 0.7,
+        "persistence": 0.8,
+        "cooperation": 0.6,
+        "risk_tolerance": 0.5,
+    },
 }
 
 
