@@ -15,8 +15,10 @@ from __future__ import annotations
 
 import threading
 from collections import defaultdict
-from typing import Callable, Iterator
+from typing import TYPE_CHECKING, Callable, Iterator
 
+from src.mouseion.backends.base import KnowledgeBackend
+from src.mouseion.backends.memory_backend import MemoryBackend
 from src.mouseion.contracts import (
     EventEnvelopeV0,
     EventKind,
@@ -25,6 +27,9 @@ from src.mouseion.contracts import (
     ResourceKind,
 )
 from src.utils.helpers import content_hash, get_logger, new_id, now_ms, sanitize_text
+
+if TYPE_CHECKING:
+    from src.mouseion.backends.vector_store import VectorStore
 
 logger = get_logger("mouseion.substrate")
 
@@ -83,7 +88,12 @@ class Mouseion:
       - Event bus (lightweight pub/sub for cross-agent signals)
     """
 
-    def __init__(self, initial_resources: dict[ResourceKind, float] | None = None) -> None:
+    def __init__(
+        self,
+        initial_resources: dict[ResourceKind, float] | None = None,
+        backend: KnowledgeBackend | None = None,
+        vector_store: "VectorStore | None" = None,
+    ) -> None:
         defaults = {
             ResourceKind.ENERGY: 1000.0,
             ResourceKind.COMPUTE: 500.0,
@@ -101,17 +111,22 @@ class Mouseion:
         self._niches: dict[str, NicheAdvertisementV0] = {}
         self._niche_lock = threading.Lock()
 
-        # Knowledge store: record_id → record
-        self._knowledge: dict[str, KnowledgeRecordV0] = {}
-        self._knowledge_index: dict[str, list[str]] = defaultdict(list)  # tag → record_ids
-        self._knowledge_lock = threading.Lock()
+        # Knowledge store — pluggable backend (MoltBook flesh).
+        # Defaults to the in-memory backend, preserving original behaviour.
+        self._backend: KnowledgeBackend = backend or MemoryBackend()
+        # Optional semantic-search index (additive; None = disabled).
+        self._vector_store: "VectorStore | None" = vector_store
 
         # Event bus: kind → list of subscriber callbacks
         self._subscribers: dict[EventKind, list[Callable[[EventEnvelopeV0], None]]] = defaultdict(list)
         self._event_history: list[EventEnvelopeV0] = []
         self._event_lock = threading.Lock()
 
-        logger.info("Mouseion substrate initialised with %d resource pools", len(self._pools))
+        logger.info(
+            "Mouseion substrate initialised with %d resource pools (backend=%s%s)",
+            len(self._pools), self._backend.name,
+            ", vector_store" if self._vector_store else "",
+        )
 
     # ------------------------------------------------------------------
     # Resource API
@@ -188,10 +203,9 @@ class Mouseion:
             confidence=confidence,
             provenance_refs=provenance_refs or [],
         )
-        with self._knowledge_lock:
-            self._knowledge[record.record_id] = record
-            for tag in record.topic_tags:
-                self._knowledge_index[tag].append(record.record_id)
+        self._backend.put(record)
+        if self._vector_store is not None:
+            self._vector_store.add(record)
 
         self._emit(EventEnvelopeV0(
             event_id=new_id("evt_"),
@@ -202,21 +216,55 @@ class Mouseion:
         return record
 
     def query_knowledge(self, tag: str) -> list[KnowledgeRecordV0]:
-        with self._knowledge_lock:
-            ids = self._knowledge_index.get(tag, [])
-            return [self._knowledge[i] for i in ids if i in self._knowledge]
+        return self._backend.query_by_tag(tag)
 
     def get_knowledge(self, record_id: str) -> KnowledgeRecordV0 | None:
-        with self._knowledge_lock:
-            return self._knowledge.get(record_id)
+        return self._backend.get(record_id)
 
     def all_knowledge(self) -> Iterator[KnowledgeRecordV0]:
-        with self._knowledge_lock:
-            yield from self._knowledge.values()
+        yield from self._backend.all()
 
     def knowledge_count(self) -> int:
-        with self._knowledge_lock:
-            return len(self._knowledge)
+        return self._backend.count()
+
+    def search_knowledge(self, text: str, limit: int = 10) -> list[KnowledgeRecordV0]:
+        """Full-text search over record content (FTS5 on SQLite, scan otherwise)."""
+        return self._backend.search(text, limit)
+
+    def semantic_query(
+        self, text: str, k: int = 5
+    ) -> list[tuple[KnowledgeRecordV0, float]]:
+        """
+        Semantic similarity search — requires a vector_store to have been passed
+        at construction. Returns (record, similarity) pairs; empty if disabled.
+        """
+        if self._vector_store is None:
+            logger.warning("semantic_query called but no vector_store configured")
+            return []
+        return self._vector_store.query(text, k)
+
+    def attach_vector_store(self, vector_store: "VectorStore") -> int:
+        """
+        Attach (or replace) a vector store and index all existing records.
+
+        Useful when opening a pre-populated durable backend: the vectors aren't
+        persisted, so rebuild the index from the corpus. Returns records indexed.
+        """
+        self._vector_store = vector_store
+        n = 0
+        for record in self._backend.all():
+            vector_store.add(record)
+            n += 1
+        logger.info("Vector store attached; indexed %d existing records", n)
+        return n
+
+    @property
+    def backend_name(self) -> str:
+        return self._backend.name
+
+    def close(self) -> None:
+        """Release backend resources (e.g. close the SQLite connection)."""
+        self._backend.close()
 
     # ------------------------------------------------------------------
     # Event bus API
