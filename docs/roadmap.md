@@ -11,7 +11,7 @@
 | ExMorbus medical domain | main | ✅ Complete |
 | SLA/SLO/SLI observability layer | main | ✅ Complete |
 | LLM-backed agent cognition | feature/llm-cognition | ✅ Complete |
-| Persistent Mouseion (SQLite + vector store) | feature/persistent-mouseion | 🔜 Queued |
+| Persistent Mouseion (SQLite + vector store) | feature/persistent-mouseion | ✅ Complete |
 | Autoresearch self-improvement loop | feature/autoresearch | 🔜 Queued |
 | Web dashboard | feature/web-dashboard | 🔜 Queued |
 | Multi-process / distributed ecosystem | feature/distributed-ecosystem | 🔜 Queued |

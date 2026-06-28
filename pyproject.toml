@@ -32,6 +32,10 @@ llm = [
     "openai>=1.20",
     "anthropic>=0.25",
 ]
+vector = [
+    # Optional upgrade for semantic search; the default HashingEmbedder needs none.
+    "sentence-transformers>=2.6",
+]
 dev = [
     "pytest>=8.1",
     "pytest-asyncio>=0.23",
