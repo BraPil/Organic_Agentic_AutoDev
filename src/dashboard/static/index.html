@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Organic Agentic AutoDev — Live</title>
+  <link rel="stylesheet" href="/static/style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+</head>
+<body>
+  <header>
+    <h1>🧬 Organic Agentic AutoDev</h1>
+    <div class="status">
+      <span id="tick" class="pill">tick 0</span>
+      <span id="sla" class="pill">SLA —</span>
+      <button id="pause">⏸ Pause</button>
+    </div>
+  </header>
+
+  <main>
+    <section class="cards">
+      <div class="card"><div class="metric" id="agents">0</div><div class="label">agents alive</div></div>
+      <div class="card"><div class="metric" id="diff">0</div><div class="label">differentiated</div></div>
+      <div class="card"><div class="metric" id="organs">0</div><div class="label">organs</div></div>
+      <div class="card"><div class="metric" id="records">0</div><div class="label">knowledge records</div></div>
+      <div class="card"><div class="metric" id="edges">0</div><div class="label">network edges</div></div>
+      <div class="card"><div class="metric" id="energy">0</div><div class="label">energy remaining</div></div>
+    </section>
+
+    <section class="panels">
+      <div class="panel">
+        <h2>Knowledge growth</h2>
+        <canvas id="knowledgeChart" height="140"></canvas>
+      </div>
+      <div class="panel">
+        <h2>SLA compliance</h2>
+        <canvas id="complianceChart" height="140"></canvas>
+      </div>
+    </section>
+
+    <section class="panels">
+      <div class="panel">
+        <h2>Role distribution</h2>
+        <div id="roles" class="roles"></div>
+      </div>
+      <div class="panel">
+        <h2>SLO status</h2>
+        <ul id="slos" class="slos"></ul>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>Recent events</h2>
+      <ul id="events" class="events"></ul>
+    </section>
+  </main>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
