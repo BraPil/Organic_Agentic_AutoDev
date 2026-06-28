@@ -14,7 +14,7 @@
 | Persistent Mouseion (SQLite + vector store) | feature/persistent-mouseion | ✅ Complete |
 | Autoresearch self-improvement loop | feature/autoresearch | ✅ Complete |
 | Web dashboard | feature/web-dashboard | ✅ Complete |
-| Multi-process / distributed ecosystem | feature/distributed-ecosystem | 🔜 Queued |
+| Multi-process / distributed ecosystem | feature/distributed-ecosystem | ✅ Complete |
 
 ---
 

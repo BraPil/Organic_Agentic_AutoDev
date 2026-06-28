@@ -40,6 +40,10 @@ dashboard = [
     "fastapi>=0.110",
     "uvicorn>=0.29",
 ]
+distributed = [
+    # Optional bridge for true multi-process / multi-machine deployment.
+    "redis>=5.0",
+]
 dev = [
     "pytest>=8.1",
     "pytest-asyncio>=0.23",
