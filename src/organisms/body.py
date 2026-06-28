@@ -83,6 +83,9 @@ class Body:
         self._network: "SlimeMoldNetwork | None" = None
         self._current_goals: list[str] = []
         self._improvement_history: list[dict] = []
+        # Optional autoresearch engine (attached via integration.attach_to_body).
+        # When None, the self-improvement cycle keeps its original behaviour.
+        self._autoresearch_engine = None
         self._created_at_ms: int = now_ms()
         logger.info("Body '%s' (%s) instantiated", name, self.body_id)
 
@@ -255,6 +258,14 @@ class Body:
         """
         if not self._organs:
             return
+
+        # If an autoresearch engine is attached, run a real experiment cycle
+        # (propose → test → commit/rollback). Additive: no engine → original path.
+        if self._autoresearch_engine is not None:
+            try:
+                self._autoresearch_engine.run_cycle(env)
+            except Exception as exc:  # never let self-improvement crash the Body
+                logger.warning("Autoresearch cycle failed: %s", exc)
 
         current_score = self._compute_fitness_score()
         prev_score = self._improvement_history[-1]["score"] if self._improvement_history else 0.0
