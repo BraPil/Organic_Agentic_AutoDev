@@ -148,15 +148,37 @@ src/
 │   ├── selector.py       # Environmental selection pressure
 │   ├── mutator.py        # Genome mutation and drift
 │   └── fitness.py        # Multi-dimensional fitness evaluation
+├── domain/
+│   └── exmorbus/         # Medical oncology specialisation (ExMorbus)
+│       ├── contracts.py      # Domain contracts (evidence levels, AE grades)
+│       ├── genome_profiles.py # Trait profiles for 8 medical roles
+│       ├── niches.py         # 12 oncology niches
+│       └── seeder.py         # 20 seed oncological knowledge records
+├── observability/
+│   ├── contracts.py      # SLA / SLO / SLI typed contracts
+│   ├── sla.py            # Pre-built medical ecosystem SLA (8 SLOs)
+│   └── tracker.py        # Real-time SLI measurement + SLO evaluation
 └── utils/
     └── helpers.py        # Shared utilities, sanitization, logging
+
+# Planned (see docs/roadmap.md):
+#   src/cognition/        # LLM-backed agent cognition
+#   src/mouseion/backends/ # SQLite + FAISS persistent flesh
+#   src/autoresearch/     # Autonomous self-improvement loop
+#   src/dashboard/        # FastAPI + WebSocket live dashboard
+#   src/distributed/      # Multi-process / distributed ecosystem
+
 examples/
 ├── basic_stem_cell.py    # Demonstrate a single StemCell lifecycle
 ├── colony_formation.py   # Watch a colony form and differentiate
-└── organ_specialization.py  # Trace organ emergence from cell clusters
-tests/
+├── organ_specialization.py  # Trace organ emergence from cell clusters
+└── medical_ecosystem.py  # Full ExMorbus oncology ecosystem + SLA tracking
+tests/                    # 160 passing tests
 docs/
-├── architecture.md
+├── architecture.md       # System layers, data flow, lifecycle
+├── roadmap.md            # Full implementation plan for remaining features
+├── runbook.md            # Operational procedures (run, debug, deploy)
+├── wiki.md              # Developer wiki / concept index
 ├── stem-cell-agents.md
 ├── mouseion-substrate.md
 ├── slime-mold-connections.md
@@ -191,12 +213,16 @@ pytest
 - [x] Slime mold adaptive network
 - [x] Differentiation hierarchy (Cell → Organ → Body)
 - [x] Evolution engine (fitness, selection, mutation)
-- [ ] LLM-backed agent cognition (OpenAI / Anthropic integration)
-- [ ] Persistent Mouseion (vector store + SQLite backend)
-- [ ] Multi-process / distributed ecosystem
-- [ ] Web dashboard for observing emergent behavior
-- [ ] Integration with autoresearch for autonomous experimentation
-- [ ] ExMorbus domain specialization modules
+- [x] ExMorbus domain specialization modules
+- [x] SLA / SLO / SLI observability layer
+- [ ] LLM-backed agent cognition (Anthropic / OpenAI integration) — `feature/llm-cognition`
+- [ ] Persistent Mouseion (SQLite backend + FAISS vector store) — `feature/persistent-mouseion`
+- [ ] Autoresearch autonomous self-improvement loop — `feature/autoresearch`
+- [ ] Web dashboard for observing emergent behavior — `feature/web-dashboard`
+- [ ] Multi-process / distributed ecosystem — `feature/distributed-ecosystem`
+
+See [`docs/roadmap.md`](docs/roadmap.md) for the full implementation plan, and
+[`docs/runbook.md`](docs/runbook.md) for operational procedures.
 
 ---
 

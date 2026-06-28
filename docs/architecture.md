@@ -160,3 +160,56 @@ compassion impact.
 
 This is deliberate: we want a system that cares about the wellbeing of its
 own members and, by extension, the humans and AI it serves.
+
+## Future Architecture (Planned Layers)
+
+The following components extend the existing architecture without altering its
+shell contracts. Each maps onto an existing layer as *flesh* per the MoltBook
+pattern. See `docs/roadmap.md` for full design detail.
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│  COGNITION (flesh on Layer 2: Cells)                                │
+│  • CognitiveCell wraps Cell with an LLM decision step               │
+│  • Genome traits → system-prompt bias (qualitative instructions)    │
+│  • Structured output via tool use → validated knowledge records     │
+│  • Providers: Anthropic (default) / OpenAI — hot-swappable          │
+└─────────────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────┐
+│  PERSISTENCE (flesh on Layer 0: Mouseion)                           │
+│  • AbstractMouseionBackend protocol; MemoryBackend stays default    │
+│  • SQLiteBackend (WAL + FTS5) for durable storage                   │
+│  • FAISS vector store → semantic_query() additive API               │
+└─────────────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────┐
+│  AUTORESEARCH (flesh on Layer 4: Body self-improvement)             │
+│  • Proposer → Runner → Evaluator → commit/rollback                  │
+│  • Fixed-budget experiments on system parameters                    │
+│  • Compassion guard rejects harmful proposals                       │
+└─────────────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────┐
+│  DASHBOARD (observer; reads all layers)                             │
+│  • FastAPI + WebSocket live tick broadcasting                       │
+│  • Vanilla JS + Chart.js, no build step                             │
+└─────────────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────┐
+│  DISTRIBUTED (orchestration around Layer 0)                         │
+│  • Async environments sharing one persistent Mouseion               │
+│  • Inter-Body SYNC signal bridge (optional Redis Pub/Sub flesh)     │
+└─────────────────────────────────────────────────────────────────────┘
+```
+
+### Why these are flesh, not shell
+
+None of the planned components require a change to `mouseion/contracts.py`,
+`genome.py`, or `signal.py` (the shell). They attach to existing extension
+points:
+
+- **Cognition** subclasses `Cell` and uses the existing `store_knowledge()` API
+- **Persistence** swaps the storage internals behind the unchanged `Mouseion` API
+- **Autoresearch** fills in the existing `Body._self_improvement_cycle()` stub
+- **Dashboard** is a read-only observer using existing `snapshot()` methods
+- **Distributed** orchestrates existing `Environment.tick()` loops
+
+This is the MoltBook promise validated: the architecture was designed so that
+the most significant new capabilities are additive flesh.
