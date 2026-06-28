@@ -14,7 +14,7 @@ import random
 
 import pytest
 
-from src.autoresearch import (
+from organic_agentic_autodev.autoresearch import (
     AutoResearchEngine,
     Checkpointer,
     EcosystemEvaluator,
@@ -22,13 +22,13 @@ from src.autoresearch import (
     attach_to_body,
     build_engine,
 )
-from src.autoresearch.contracts import ExperimentProposalV0, ExperimentType
-from src.core.environment import Environment
-from src.evolution.mutator import Mutator
-from src.evolution.selector import Selector
-from src.mouseion.substrate import Mouseion
-from src.organisms.body import Body
-from src.utils.helpers import new_id
+from organic_agentic_autodev.autoresearch.contracts import ExperimentProposalV0, ExperimentType
+from organic_agentic_autodev.core.environment import Environment
+from organic_agentic_autodev.evolution.mutator import Mutator
+from organic_agentic_autodev.evolution.selector import Selector
+from organic_agentic_autodev.mouseion.substrate import Mouseion
+from organic_agentic_autodev.organisms.body import Body
+from organic_agentic_autodev.utils.helpers import new_id
 
 
 @pytest.fixture
@@ -213,9 +213,9 @@ def test_build_engine_factory():
 
 def test_attach_to_body_runs_real_cycles(env):
     """A Body with an attached engine runs experiments in its improvement cycle."""
-    from src.organisms.cell import Cell
-    from src.organisms.organ import Organ
-    from src.mouseion.contracts import AgentRole
+    from organic_agentic_autodev.organisms.cell import Cell
+    from organic_agentic_autodev.organisms.organ import Organ
+    from organic_agentic_autodev.mouseion.contracts import AgentRole
 
     body = Body("Test Body")
     # Give the body an organ so _self_improvement_cycle proceeds.
@@ -233,9 +233,9 @@ def test_attach_to_body_runs_real_cycles(env):
 
 def test_body_without_engine_still_works(env):
     """Backwards compatibility: a Body with no engine behaves as before."""
-    from src.organisms.cell import Cell
-    from src.organisms.organ import Organ
-    from src.mouseion.contracts import AgentRole
+    from organic_agentic_autodev.organisms.cell import Cell
+    from organic_agentic_autodev.organisms.organ import Organ
+    from organic_agentic_autodev.mouseion.contracts import AgentRole
 
     body = Body("Plain Body")
     cells = [Cell(role=AgentRole.RESEARCHER, initial_energy=15.0) for _ in range(2)]

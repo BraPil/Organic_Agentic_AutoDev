@@ -12,7 +12,7 @@ Organic Agentic AutoDev ecosystem.
 pip install -e ".[dev,llm]"
 
 # Verify install
-python -c "from src.mouseion.substrate import Mouseion; print('OK')"
+python -c "from organic_agentic_autodev.mouseion.substrate import Mouseion; print('OK')"
 ```
 
 ### Optional environment variables
@@ -68,7 +68,7 @@ ANTHROPIC_API_KEY=sk-... python examples/cognitive_demo.py
 pytest                          # full suite (currently 160 tests)
 pytest tests/test_mouseion.py   # one module
 pytest -k "differentiation"     # by keyword
-pytest --cov=src --cov-report=term-missing   # coverage
+pytest --cov=organic_agentic_autodev --cov-report=term-missing   # coverage
 ```
 
 ### Test conventions

@@ -18,15 +18,15 @@ import tempfile
 
 import pytest
 
-from src.mouseion.backends import (
+from organic_agentic_autodev.mouseion.backends import (
     HashingEmbedder,
     MemoryBackend,
     SQLiteBackend,
     VectorStore,
 )
-from src.mouseion.contracts import KnowledgeRecordV0
-from src.mouseion.substrate import Mouseion
-from src.utils.helpers import content_hash, new_id
+from organic_agentic_autodev.mouseion.contracts import KnowledgeRecordV0
+from organic_agentic_autodev.mouseion.substrate import Mouseion
+from organic_agentic_autodev.utils.helpers import content_hash, new_id
 
 
 def _record(content: str, tags: list[str], confidence: float = 0.8) -> KnowledgeRecordV0:

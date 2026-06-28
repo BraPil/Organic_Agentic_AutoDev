@@ -9,14 +9,14 @@ organs forming, knowledge growing, and SLOs breaching/recovering in real time.
 tests + 5 FastAPI route/websocket tests); full suite 229 passing. Validated
 live (REST + WebSocket + static serving).
 
-## Module map (`src/dashboard/`)
+## Module map (`organic_agentic_autodev/dashboard/`)
 
 | File | Role | Dependency |
 |------|------|-----------|
-| `sim_runner.py` | `DashboardSimulation` — observable ecosystem + state shaping | none (stdlib + src) |
+| `sim_runner.py` | `DashboardSimulation` — observable ecosystem + state shaping | none (stdlib + organic_agentic_autodev) |
 | `app.py` | `create_app()` / `run()` — FastAPI transport | FastAPI (optional) |
 | `__init__.py` | lazy proxies so the package imports without FastAPI | none |
-| `__main__.py` | `python -m src.dashboard` entry point | uvicorn |
+| `__main__.py` | `python -m organic_agentic_autodev.dashboard` entry point | uvicorn |
 | `static/` | `index.html`, `style.css`, `app.js` — no build step | Chart.js via CDN |
 
 ## Architecture
@@ -24,7 +24,7 @@ live (REST + WebSocket + static serving).
 The simulation core is **dependency-free** and fully unit-tested offline.
 FastAPI is a thin transport layer imported lazily, so:
 
-- `from src.dashboard import DashboardSimulation` works with no web deps.
+- `from organic_agentic_autodev.dashboard import DashboardSimulation` works with no web deps.
 - `create_app()` imports FastAPI only when called.
 - CI stays green without FastAPI (route tests use `pytest.importorskip`).
 
@@ -71,7 +71,7 @@ The client uses the WebSocket for live updates and **falls back to polling
 
 ```bash
 pip install -e ".[dashboard]"
-python -m src.dashboard            # http://127.0.0.1:8000
+python -m organic_agentic_autodev.dashboard            # http://127.0.0.1:8000
 ```
 
 Panels: live metric cards (agents, organs, records, energy), knowledge-growth

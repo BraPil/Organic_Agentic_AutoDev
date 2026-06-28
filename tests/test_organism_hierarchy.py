@@ -5,14 +5,14 @@ tests/test_organism_hierarchy.py — Tests for Cell, Organ, and Body.
 import random
 import pytest
 
-from src.core.environment import Environment
-from src.mouseion.substrate import Mouseion
-from src.mouseion.contracts import AgentRole
-from src.organisms.cell import Cell, COMPATIBLE_ROLES
-from src.organisms.organ import Organ, MIN_ORGAN_SIZE
-from src.organisms.body import Body
-from src.slime_mold.network import SlimeMoldNetwork
-from src.core.genome import Genome
+from organic_agentic_autodev.core.environment import Environment
+from organic_agentic_autodev.mouseion.substrate import Mouseion
+from organic_agentic_autodev.mouseion.contracts import AgentRole
+from organic_agentic_autodev.organisms.cell import Cell, COMPATIBLE_ROLES
+from organic_agentic_autodev.organisms.organ import Organ, MIN_ORGAN_SIZE
+from organic_agentic_autodev.organisms.body import Body
+from organic_agentic_autodev.slime_mold.network import SlimeMoldNetwork
+from organic_agentic_autodev.core.genome import Genome
 
 
 def make_env(seed: int = 0) -> tuple[Mouseion, Environment]:
@@ -119,7 +119,7 @@ class TestOrgan:
 class TestBody:
     def test_body_not_functional_with_few_organs(self):
         body = Body("TestBody")
-        from src.organisms.organ import MIN_ORGAN_SIZE
+        from organic_agentic_autodev.organisms.organ import MIN_ORGAN_SIZE
         for _ in range(2):  # fewer than MIN_ORGANS_FOR_FULL_FUNCTION
             cells = [Cell(role=AgentRole.RESEARCHER, initial_energy=10.0) for _ in range(2)]
             organ = Organ(founding_cells=cells)
@@ -128,7 +128,7 @@ class TestBody:
 
     def test_body_becomes_functional_with_enough_organs(self):
         body = Body("FullBody")
-        from src.organisms.body import MIN_ORGANS_FOR_FULL_FUNCTION
+        from organic_agentic_autodev.organisms.body import MIN_ORGANS_FOR_FULL_FUNCTION
         for i in range(MIN_ORGANS_FOR_FULL_FUNCTION):
             role = list(AgentRole)[i + 1]  # skip STEM_CELL
             cells = [Cell(role=role, initial_energy=10.0) for _ in range(2)]

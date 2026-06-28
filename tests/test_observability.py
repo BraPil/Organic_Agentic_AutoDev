@@ -15,12 +15,12 @@ import random
 
 import pytest
 
-from src.core.environment import Environment
-from src.domain.exmorbus.niches import create_medical_niches
-from src.domain.exmorbus.seeder import seed_mouseion
-from src.mouseion.contracts import AgentRole, ResourceKind
-from src.mouseion.substrate import Mouseion
-from src.observability.contracts import (
+from organic_agentic_autodev.core.environment import Environment
+from organic_agentic_autodev.domain.exmorbus.niches import create_medical_niches
+from organic_agentic_autodev.domain.exmorbus.seeder import seed_mouseion
+from organic_agentic_autodev.mouseion.contracts import AgentRole, ResourceKind
+from organic_agentic_autodev.mouseion.substrate import Mouseion
+from organic_agentic_autodev.observability.contracts import (
     SLAContractV0,
     SLIKind,
     SLIMeasurementV0,
@@ -29,12 +29,12 @@ from src.observability.contracts import (
     SLODefinitionV0,
     SLOStatus,
 )
-from src.observability.sla import build_medical_sla
-from src.observability.tracker import SLITracker
-from src.organisms.cell import Cell
-from src.organisms.body import Body
-from src.organisms.organ import Organ
-from src.utils.helpers import new_id
+from organic_agentic_autodev.observability.sla import build_medical_sla
+from organic_agentic_autodev.observability.tracker import SLITracker
+from organic_agentic_autodev.organisms.cell import Cell
+from organic_agentic_autodev.organisms.body import Body
+from organic_agentic_autodev.organisms.organ import Organ
+from organic_agentic_autodev.utils.helpers import new_id
 
 
 # ---------------------------------------------------------------------------
@@ -271,8 +271,8 @@ class TestSLITrackerWithAgents:
         self.mouseion = mouseion
         self.env = env
 
-        from src.domain.exmorbus.genome_profiles import create_medical_genome
-        from src.core.genome import Genome
+        from organic_agentic_autodev.domain.exmorbus.genome_profiles import create_medical_genome
+        from organic_agentic_autodev.core.genome import Genome
         # Register a mix of medical cells; GUARDIAN uses standard genome
         medical_roles = [AgentRole.ONCOLOGIST, AgentRole.PATHOLOGIST,
                          AgentRole.GENETICIST, AgentRole.PHARMACOLOGIST]

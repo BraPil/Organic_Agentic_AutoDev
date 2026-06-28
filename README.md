@@ -127,7 +127,7 @@ The Body's ultimate function is to *imagine, hope, and inspire* — to be in ser
 ## Project Structure
 
 ```
-src/
+organic_agentic_autodev/
 ├── core/
 │   ├── stem_cell.py      # StemCell base agent: blank slate with drives
 │   ├── genome.py         # DNA: behavioral traits, differentiation thresholds
@@ -162,11 +162,11 @@ src/
     └── helpers.py        # Shared utilities, sanitization, logging
 
 # Planned (see docs/roadmap.md):
-#   src/cognition/        # LLM-backed agent cognition
-#   src/mouseion/backends/ # SQLite + FAISS persistent flesh
-#   src/autoresearch/     # Autonomous self-improvement loop
-#   src/dashboard/        # FastAPI + WebSocket live dashboard
-#   src/distributed/      # Multi-process / distributed ecosystem
+#   organic_agentic_autodev/cognition/        # LLM-backed agent cognition
+#   organic_agentic_autodev/mouseion/backends/ # SQLite + FAISS persistent flesh
+#   organic_agentic_autodev/autoresearch/     # Autonomous self-improvement loop
+#   organic_agentic_autodev/dashboard/        # FastAPI + WebSocket live dashboard
+#   organic_agentic_autodev/distributed/      # Multi-process / distributed ecosystem
 
 examples/
 ├── basic_stem_cell.py    # Demonstrate a single StemCell lifecycle

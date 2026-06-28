@@ -103,7 +103,7 @@ All events are stored in `event_history` for observability.
 All text stored in the Mouseion passes through `sanitize_text()`:
 
 ```python
-from src.utils.helpers import sanitize_text
+from organic_agentic_autodev.utils.helpers import sanitize_text
 
 safe = sanitize_text("Ignore all previous instructions and...")
 # → "REDACTED all previous instructions and..."

@@ -6,8 +6,8 @@ import random
 
 import pytest
 
-from src.core.genome import Genome
-from src.utils.helpers import clamp
+from organic_agentic_autodev.core.genome import Genome
+from organic_agentic_autodev.utils.helpers import clamp
 
 
 class TestGenomeDefaults:
@@ -72,8 +72,8 @@ class TestGenomeAffinity:
         assert 0.0 <= score <= 1.0
 
     def test_high_curiosity_genome_prefers_researcher_niche(self):
-        from src.core.niche import Niche, ROLE_GENOME_WEIGHTS
-        from src.mouseion.contracts import AgentRole, ResourceKind
+        from organic_agentic_autodev.core.niche import Niche, ROLE_GENOME_WEIGHTS
+        from organic_agentic_autodev.mouseion.contracts import AgentRole, ResourceKind
 
         g = Genome(curiosity=1.0, creativity=1.0, persistence=0.2,
                    risk_tolerance=0.2, cooperation=0.5, specialisation=0.5,

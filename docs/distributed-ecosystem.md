@@ -10,7 +10,7 @@ Body independently.
 ✅ Implemented on `feature/distributed-ecosystem`. 12 new tests; full suite 241
 passing.
 
-## Module map (`src/distributed/`)
+## Module map (`organic_agentic_autodev/distributed/`)
 
 | File | Role | Shell/Flesh |
 |------|------|-------------|
@@ -67,7 +67,7 @@ one-line change. The bridge tolerates a failing subscriber (logs and continues).
 
 ```python
 import asyncio
-from src.distributed import build_colony
+from organic_agentic_autodev.distributed import build_colony
 
 async def main():
     coordinator = build_colony(n_nodes=4, agents_per_node=8, seed=42)

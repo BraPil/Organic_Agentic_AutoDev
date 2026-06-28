@@ -15,23 +15,23 @@ import random
 
 import pytest
 
-from src.cognition import (
+from organic_agentic_autodev.cognition import (
     CognitiveCell,
     MockProvider,
     build_system_prompt,
     genome_to_bias,
     get_provider,
 )
-from src.cognition.contracts import (
+from organic_agentic_autodev.cognition.contracts import (
     CognitionRequestV0,
     CognitionResponseV0,
     CognitiveAction,
 )
-from src.cognition.provider import AbstractLLMProvider
-from src.core.environment import Environment
-from src.core.genome import Genome
-from src.mouseion.contracts import AgentRole
-from src.mouseion.substrate import Mouseion
+from organic_agentic_autodev.cognition.provider import AbstractLLMProvider
+from organic_agentic_autodev.core.environment import Environment
+from organic_agentic_autodev.core.genome import Genome
+from organic_agentic_autodev.mouseion.contracts import AgentRole
+from organic_agentic_autodev.mouseion.substrate import Mouseion
 
 
 # ---------------------------------------------------------------------------

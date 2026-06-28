@@ -16,11 +16,11 @@ from __future__ import annotations
 import asyncio
 import logging
 
-from src.core.environment import Environment
-from src.core.stem_cell import StemCell
-from src.distributed import AsyncEcosystem, EcosystemCoordinator, InProcessBridge
-from src.mouseion.contracts import ResourceKind
-from src.mouseion.substrate import Mouseion
+from organic_agentic_autodev.core.environment import Environment
+from organic_agentic_autodev.core.stem_cell import StemCell
+from organic_agentic_autodev.distributed import AsyncEcosystem, EcosystemCoordinator, InProcessBridge
+from organic_agentic_autodev.mouseion.contracts import ResourceKind
+from organic_agentic_autodev.mouseion.substrate import Mouseion
 
 import random
 
@@ -82,7 +82,7 @@ async def main(n_nodes: int = 4, ticks: int = 40, seed: int = 42) -> None:
     # Explicit demonstration of cross-body vision propagation via the bridge.
     # (Organic Body visions need 3+ organs; here we inject one to show the wire.)
     # ----------------------------------------------------------------
-    from src.organisms.body import BodyVision
+    from organic_agentic_autodev.organisms.body import BodyVision
 
     print("\n  ── Cross-body vision propagation (bridge) ──")
     origin = coordinator.nodes[0]

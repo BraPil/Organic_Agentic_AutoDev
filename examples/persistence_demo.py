@@ -20,9 +20,9 @@ import tempfile
 
 logging.basicConfig(level=logging.WARNING)
 
-from src.domain.exmorbus import seed_mouseion
-from src.mouseion.backends import SQLiteBackend, VectorStore
-from src.mouseion.substrate import Mouseion
+from organic_agentic_autodev.domain.exmorbus import seed_mouseion
+from organic_agentic_autodev.mouseion.backends import SQLiteBackend, VectorStore
+from organic_agentic_autodev.mouseion.substrate import Mouseion
 
 
 def main() -> None:
