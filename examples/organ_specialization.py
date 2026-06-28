@@ -19,16 +19,16 @@ import os
 import random
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-from src.core.genome import Genome
-from src.core.environment import Environment
-from src.mouseion.substrate import Mouseion
-from src.mouseion.contracts import AgentRole
-from src.organisms.cell import Cell
-from src.organisms.organ import Organ
-from src.organisms.body import Body
-from src.slime_mold.network import SlimeMoldNetwork
-from src.slime_mold.signal import Signal, SignalType
-from src.utils.helpers import new_id
+from organic_agentic_autodev.core.genome import Genome
+from organic_agentic_autodev.core.environment import Environment
+from organic_agentic_autodev.mouseion.substrate import Mouseion
+from organic_agentic_autodev.mouseion.contracts import AgentRole
+from organic_agentic_autodev.organisms.cell import Cell
+from organic_agentic_autodev.organisms.organ import Organ
+from organic_agentic_autodev.organisms.body import Body
+from organic_agentic_autodev.slime_mold.network import SlimeMoldNetwork
+from organic_agentic_autodev.slime_mold.signal import Signal, SignalType
+from organic_agentic_autodev.utils.helpers import new_id
 
 
 def main() -> None:

@@ -11,7 +11,7 @@ rather than model weights.
 ✅ Implemented on `feature/autoresearch`. 16 new tests; full suite 217 passing.
 Additive — a Body with no engine attached behaves exactly as before.
 
-## Module map (`src/autoresearch/`)
+## Module map (`organic_agentic_autodev/autoresearch/`)
 
 | File | Role |
 |------|------|
@@ -77,7 +77,7 @@ change that would plausibly harm agents — *before* it ever runs:
 ## Wiring into a Body
 
 ```python
-from src.autoresearch import build_engine, attach_to_body
+from organic_agentic_autodev.autoresearch import build_engine, attach_to_body
 
 engine = build_engine(selector=selector, mutator=mutator,
                       initial_energy=8000.0, experiment_ticks=6)

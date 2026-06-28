@@ -52,9 +52,12 @@ dev = [
     "mypy>=1.9",
 ]
 
+[project.scripts]
+oaa-learning-cycle = "organic_agentic_autodev.cognition.run_cycle:main"
+
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["src*"]
+include = ["organic_agentic_autodev*"]
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"

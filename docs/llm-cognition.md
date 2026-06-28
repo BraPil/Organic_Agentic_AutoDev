@@ -10,7 +10,7 @@ its genome traits biasing the system prompt.
 `claude-opus-4-8` (structured output via `messages.parse()`). All tests run
 offline via `MockProvider`.
 
-## Module map (`src/cognition/`)
+## Module map (`organic_agentic_autodev/cognition/`)
 
 | File | Role | Shell/Flesh |
 |------|------|-------------|
@@ -70,7 +70,7 @@ prompt a tight, cache-stable prefix:
 ## Usage
 
 ```python
-from src.cognition import CognitiveCell, get_provider
+from organic_agentic_autodev.cognition import CognitiveCell, get_provider
 
 provider = get_provider()                  # auto-selects from env
 cell = CognitiveCell(

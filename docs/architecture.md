@@ -56,14 +56,14 @@
 Following BraPil/Agentic-AI-Architect's MoltBook pattern:
 
 **Shell (stable, rarely changes):**
-- `src/mouseion/contracts.py` — Pydantic schemas, enums, typed event contracts
-- `src/core/genome.py` — Genome data class (behavioral tendencies)
-- `src/slime_mold/signal.py` — Signal data class (chemical-analog messages)
+- `organic_agentic_autodev/mouseion/contracts.py` — Pydantic schemas, enums, typed event contracts
+- `organic_agentic_autodev/core/genome.py` — Genome data class (behavioral tendencies)
+- `organic_agentic_autodev/slime_mold/signal.py` — Signal data class (chemical-analog messages)
 - All `__init__.py` public APIs
 
 **Flesh (replaceable, technology-specific):**
-- `src/mouseion/substrate.py` — In-memory implementation (swap → SQLite → PostgreSQL)
-- `src/slime_mold/pathfinder.py` — NetworkX implementation (swap → custom graph)
+- `organic_agentic_autodev/mouseion/substrate.py` — In-memory implementation (swap → SQLite → PostgreSQL)
+- `organic_agentic_autodev/slime_mold/pathfinder.py` — NetworkX implementation (swap → custom graph)
 - LLM integration (future) — swap OpenAI → Anthropic → local OSS
 - Vector store (future) — swap in-memory → FAISS → Qdrant
 

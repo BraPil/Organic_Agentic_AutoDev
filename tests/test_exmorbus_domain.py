@@ -16,30 +16,30 @@ import random
 
 import pytest
 
-from src.core.environment import Environment
-from src.core.genome import Genome
-from src.domain.exmorbus.contracts import (
+from organic_agentic_autodev.core.environment import Environment
+from organic_agentic_autodev.core.genome import Genome
+from organic_agentic_autodev.domain.exmorbus.contracts import (
     AdverseEventSeverity,
     ClinicalEvidenceLevel,
     MedicalKnowledgeRecordV0,
     MedicalKnowledgeType,
     OncologyDomain,
 )
-from src.domain.exmorbus.genome_profiles import (
+from organic_agentic_autodev.domain.exmorbus.genome_profiles import (
     MEDICAL_ROLE_BIAS,
     all_medical_roles,
     create_medical_genome,
 )
-from src.domain.exmorbus.niches import create_medical_niches, _MEDICAL_NICHE_SPECS
-from src.domain.exmorbus.seeder import (
+from organic_agentic_autodev.domain.exmorbus.niches import create_medical_niches, _MEDICAL_NICHE_SPECS
+from organic_agentic_autodev.domain.exmorbus.seeder import (
     EXMORBUS_SEED_AUTHOR,
     _SEED_ENTRIES,
     seed_mouseion,
     seed_summary,
 )
-from src.mouseion.contracts import AgentRole, ResourceKind
-from src.mouseion.substrate import Mouseion
-from src.organisms.cell import Cell
+from organic_agentic_autodev.mouseion.contracts import AgentRole, ResourceKind
+from organic_agentic_autodev.mouseion.substrate import Mouseion
+from organic_agentic_autodev.organisms.cell import Cell
 
 
 # ---------------------------------------------------------------------------
@@ -248,7 +248,7 @@ class TestMedicalNiches:
         assert any(n.urgency >= max_urgency - 0.01 for n in guardian_niches)
 
     def test_all_medical_roles_covered(self):
-        from src.domain.exmorbus.genome_profiles import MEDICAL_ROLE_BIAS
+        from organic_agentic_autodev.domain.exmorbus.genome_profiles import MEDICAL_ROLE_BIAS
         niche_roles = {n.role for n in self.niches}
         medical_roles = set(MEDICAL_ROLE_BIAS.keys())
         missing = medical_roles - niche_roles
@@ -273,7 +273,7 @@ class TestMedicalNiches:
         assert len(env.open_niches()) == 12
 
     def test_genome_affinity_works_with_medical_niches(self):
-        from src.core.genome import Genome
+        from organic_agentic_autodev.core.genome import Genome
         genome = Genome(curiosity=0.9, creativity=0.9, persistence=0.8,
                         risk_tolerance=0.3, cooperation=0.6, specialisation=0.7,
                         compassion=0.7, resilience=0.6)

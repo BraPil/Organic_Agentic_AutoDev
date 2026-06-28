@@ -13,9 +13,9 @@ import random
 
 import pytest
 
-from src.core.environment import Environment
-from src.core.stem_cell import StemCell
-from src.distributed import (
+from organic_agentic_autodev.core.environment import Environment
+from organic_agentic_autodev.core.stem_cell import StemCell
+from organic_agentic_autodev.distributed import (
     AsyncEcosystem,
     CrossBodyMessage,
     EcosystemCoordinator,
@@ -23,10 +23,10 @@ from src.distributed import (
     build_colony,
     run_colony,
 )
-from src.distributed.async_environment import VISION_TOPIC
-from src.mouseion.substrate import Mouseion
-from src.organisms.body import BodyVision
-from src.utils.helpers import new_id
+from organic_agentic_autodev.distributed.async_environment import VISION_TOPIC
+from organic_agentic_autodev.mouseion.substrate import Mouseion
+from organic_agentic_autodev.organisms.body import BodyVision
+from organic_agentic_autodev.utils.helpers import new_id
 
 
 # ---------------------------------------------------------------------------

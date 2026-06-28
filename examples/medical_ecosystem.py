@@ -53,17 +53,17 @@ logging.getLogger("cell").setLevel(logging.WARNING)
 logging.getLogger("organ").setLevel(logging.WARNING)
 logging.getLogger("body").setLevel(logging.WARNING)
 
-from src.core.environment import Environment
-from src.core.stem_cell import StemCell
-from src.domain.exmorbus import create_medical_genome, create_medical_niches, seed_mouseion
-from src.domain.exmorbus.seeder import seed_summary
-from src.mouseion.contracts import AgentRole, ResourceKind
-from src.mouseion.substrate import Mouseion
-from src.observability import SLITracker, build_medical_sla
-from src.organisms.body import Body
-from src.organisms.cell import Cell
-from src.organisms.organ import Organ
-from src.slime_mold.network import SlimeMoldNetwork
+from organic_agentic_autodev.core.environment import Environment
+from organic_agentic_autodev.core.stem_cell import StemCell
+from organic_agentic_autodev.domain.exmorbus import create_medical_genome, create_medical_niches, seed_mouseion
+from organic_agentic_autodev.domain.exmorbus.seeder import seed_summary
+from organic_agentic_autodev.mouseion.contracts import AgentRole, ResourceKind
+from organic_agentic_autodev.mouseion.substrate import Mouseion
+from organic_agentic_autodev.observability import SLITracker, build_medical_sla
+from organic_agentic_autodev.organisms.body import Body
+from organic_agentic_autodev.organisms.cell import Cell
+from organic_agentic_autodev.organisms.organ import Organ
+from organic_agentic_autodev.slime_mold.network import SlimeMoldNetwork
 
 
 def print_header(title: str) -> None:

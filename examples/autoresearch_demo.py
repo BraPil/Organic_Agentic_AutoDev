@@ -16,13 +16,13 @@ from __future__ import annotations
 import logging
 import random
 
-from src.autoresearch import build_engine
-from src.core.environment import Environment
-from src.core.stem_cell import StemCell
-from src.evolution.mutator import Mutator
-from src.evolution.selector import Selector
-from src.mouseion.contracts import ResourceKind
-from src.mouseion.substrate import Mouseion
+from organic_agentic_autodev.autoresearch import build_engine
+from organic_agentic_autodev.core.environment import Environment
+from organic_agentic_autodev.core.stem_cell import StemCell
+from organic_agentic_autodev.evolution.mutator import Mutator
+from organic_agentic_autodev.evolution.selector import Selector
+from organic_agentic_autodev.mouseion.contracts import ResourceKind
+from organic_agentic_autodev.mouseion.substrate import Mouseion
 
 # Quiet per-tick logging AFTER imports (get_logger sets INFO at creation time).
 for _name in ("mouseion.substrate", "environment", "stem_cell",

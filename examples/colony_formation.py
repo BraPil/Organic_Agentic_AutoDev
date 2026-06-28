@@ -18,12 +18,12 @@ import os
 import random
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-from src.core.genome import Genome
-from src.core.stem_cell import StemCell
-from src.core.environment import Environment
-from src.mouseion.substrate import Mouseion
-from src.mouseion.contracts import EventKind
-from src.evolution.selector import Selector
+from organic_agentic_autodev.core.genome import Genome
+from organic_agentic_autodev.core.stem_cell import StemCell
+from organic_agentic_autodev.core.environment import Environment
+from organic_agentic_autodev.mouseion.substrate import Mouseion
+from organic_agentic_autodev.mouseion.contracts import EventKind
+from organic_agentic_autodev.evolution.selector import Selector
 
 
 def main() -> None:

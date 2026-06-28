@@ -15,13 +15,13 @@ import json
 
 import pytest
 
-from src.cognition.bridge import (
+from organic_agentic_autodev.cognition.bridge import (
     DeterministicCognition,
     LearningCycle,
     make_cognition,
 )
-from src.mouseion.contracts import KnowledgeRecordV0
-from src.mouseion.substrate import Mouseion
+from organic_agentic_autodev.mouseion.contracts import KnowledgeRecordV0
+from organic_agentic_autodev.mouseion.substrate import Mouseion
 
 
 def _seed(n_researchers: int = 2, n_critics: int = 2) -> dict:

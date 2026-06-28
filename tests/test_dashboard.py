@@ -14,7 +14,7 @@ import json
 
 import pytest
 
-from src.dashboard import DashboardSimulation
+from organic_agentic_autodev.dashboard import DashboardSimulation
 
 
 # ---------------------------------------------------------------------------
@@ -91,7 +91,7 @@ def test_roles_track_differentiation(sim):
 def _client():
     pytest.importorskip("fastapi")
     from fastapi.testclient import TestClient
-    from src.dashboard import create_app
+    from organic_agentic_autodev.dashboard import create_app
 
     return TestClient(create_app(DashboardSimulation(n_stem_cells=8, seed=3)))
 
@@ -127,7 +127,7 @@ def test_index_route_serves_html():
 def test_websocket_streams_snapshots():
     pytest.importorskip("fastapi")
     from fastapi.testclient import TestClient
-    from src.dashboard import create_app
+    from organic_agentic_autodev.dashboard import create_app
 
     client = TestClient(create_app(DashboardSimulation(n_stem_cells=8, seed=1),
                                    tick_interval=0.01))

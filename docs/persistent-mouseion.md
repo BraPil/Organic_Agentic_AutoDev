@@ -9,7 +9,7 @@ caller. A pure MoltBook flesh swap.
 ✅ Implemented on `feature/persistent-mouseion`. 19 new tests; full suite 201
 passing. Zero breaking changes — the default Mouseion still uses `MemoryBackend`.
 
-## Module map (`src/mouseion/backends/`)
+## Module map (`organic_agentic_autodev/mouseion/backends/`)
 
 | File | Role | Shell/Flesh |
 |------|------|-------------|
@@ -53,8 +53,8 @@ New methods (all additive):
 - Pure stdlib (`sqlite3`) — no third-party dependency
 
 ```python
-from src.mouseion.backends import SQLiteBackend
-from src.mouseion.substrate import Mouseion
+from organic_agentic_autodev.mouseion.backends import SQLiteBackend
+from organic_agentic_autodev.mouseion.substrate import Mouseion
 
 m = Mouseion(backend=SQLiteBackend("mouseion.db"))
 m.store_knowledge("agent", "durable finding", topic_tags=["research"])
@@ -81,7 +81,7 @@ The numpy brute-force index is correct and fast at POC scale; FAISS/Qdrant can
 replace the index behind the same `VectorStore` interface for scale.
 
 ```python
-from src.mouseion.backends import VectorStore
+from organic_agentic_autodev.mouseion.backends import VectorStore
 
 m = Mouseion(vector_store=VectorStore())
 m.store_knowledge("agent", "EGFR lung cancer osimertinib", topic_tags=["lung"])

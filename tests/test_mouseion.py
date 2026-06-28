@@ -4,11 +4,11 @@ tests/test_mouseion.py — Tests for the Mouseion substrate.
 
 import pytest
 
-from src.mouseion.substrate import Mouseion
-from src.mouseion.contracts import (
+from organic_agentic_autodev.mouseion.substrate import Mouseion
+from organic_agentic_autodev.mouseion.contracts import (
     EventKind, KnowledgeRecordV0, NicheAdvertisementV0, ResourceKind,
 )
-from src.utils.helpers import new_id
+from organic_agentic_autodev.utils.helpers import new_id
 
 
 class TestResourcePool:

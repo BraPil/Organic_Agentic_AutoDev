@@ -5,11 +5,11 @@ tests/test_stem_cell.py — Tests for StemCell lifecycle and differentiation.
 import random
 import pytest
 
-from src.core.genome import Genome
-from src.core.stem_cell import StemCell
-from src.core.environment import Environment
-from src.mouseion.substrate import Mouseion
-from src.mouseion.contracts import AgentRole, EventKind
+from organic_agentic_autodev.core.genome import Genome
+from organic_agentic_autodev.core.stem_cell import StemCell
+from organic_agentic_autodev.core.environment import Environment
+from organic_agentic_autodev.mouseion.substrate import Mouseion
+from organic_agentic_autodev.mouseion.contracts import AgentRole, EventKind
 
 
 def make_env(seed: int = 0) -> tuple[Mouseion, Environment]:
@@ -67,9 +67,9 @@ class TestStemCellStep:
         cell = StemCell(initial_energy=5.0)
         # Drain all resources first so step doesn't refill
         mouseion.draw_resource(
-            __import__("src.mouseion.contracts", fromlist=["ResourceKind"]).ResourceKind.ENERGY,
+            __import__("organic_agentic_autodev.mouseion.contracts", fromlist=["ResourceKind"]).ResourceKind.ENERGY,
             mouseion.resource_level(
-                __import__("src.mouseion.contracts", fromlist=["ResourceKind"]).ResourceKind.ENERGY
+                __import__("organic_agentic_autodev.mouseion.contracts", fromlist=["ResourceKind"]).ResourceKind.ENERGY
             ),
             "test",
         )

@@ -31,7 +31,7 @@ wider; a low-`risk_tolerance` pharmacologist is more conservative.
 ### Architecture
 
 ```
-src/cognition/
+organic_agentic_autodev/cognition/
 ├── contracts.py          # Shell: CognitionRequestV0, CognitionResponseV0
 ├── provider.py           # Shell: AbstractLLMProvider protocol
 ├── genome_prompt.py      # Genome trait → prompt bias (qualitative language)
@@ -77,12 +77,12 @@ src/cognition/
 
 | File | Purpose |
 |------|---------|
-| `src/cognition/contracts.py` | `CognitionRequestV0`, `CognitionResponseV0`, `GenomePromptBias` |
-| `src/cognition/provider.py` | `AbstractLLMProvider` (Protocol) |
-| `src/cognition/genome_prompt.py` | `genome_to_bias(genome, role) → str` |
-| `src/cognition/anthropic_provider.py` | `AnthropicProvider(AbstractLLMProvider)` |
-| `src/cognition/openai_provider.py` | `OpenAIProvider(AbstractLLMProvider)` |
-| `src/cognition/cognitive_cell.py` | `CognitiveCell(Cell)` with LLM step |
+| `organic_agentic_autodev/cognition/contracts.py` | `CognitionRequestV0`, `CognitionResponseV0`, `GenomePromptBias` |
+| `organic_agentic_autodev/cognition/provider.py` | `AbstractLLMProvider` (Protocol) |
+| `organic_agentic_autodev/cognition/genome_prompt.py` | `genome_to_bias(genome, role) → str` |
+| `organic_agentic_autodev/cognition/anthropic_provider.py` | `AnthropicProvider(AbstractLLMProvider)` |
+| `organic_agentic_autodev/cognition/openai_provider.py` | `OpenAIProvider(AbstractLLMProvider)` |
+| `organic_agentic_autodev/cognition/cognitive_cell.py` | `CognitiveCell(Cell)` with LLM step |
 
 ### Tests
 
@@ -105,7 +105,7 @@ retrieve conceptually-related knowledge (not just tag-indexed).
 ### Architecture
 
 ```
-src/mouseion/backends/
+organic_agentic_autodev/mouseion/backends/
 ├── base.py               # AbstractMouseionBackend protocol (shell)
 ├── memory_backend.py     # Extracted in-memory logic (current behaviour)
 ├── sqlite_backend.py     # SQLite flesh (zero-dep durable storage)
@@ -140,10 +140,10 @@ changes to existing code and tests.
 
 | File | Purpose |
 |------|---------|
-| `src/mouseion/backends/base.py` | `AbstractMouseionBackend` protocol |
-| `src/mouseion/backends/memory_backend.py` | Extracted in-memory backend |
-| `src/mouseion/backends/sqlite_backend.py` | SQLite backend (WAL + FTS5) |
-| `src/mouseion/backends/vector_store.py` | FAISS wrapper + `semantic_query()` |
+| `organic_agentic_autodev/mouseion/backends/base.py` | `AbstractMouseionBackend` protocol |
+| `organic_agentic_autodev/mouseion/backends/memory_backend.py` | Extracted in-memory backend |
+| `organic_agentic_autodev/mouseion/backends/sqlite_backend.py` | SQLite backend (WAL + FTS5) |
+| `organic_agentic_autodev/mouseion/backends/vector_store.py` | FAISS wrapper + `semantic_query()` |
 
 ### Tests
 
@@ -167,7 +167,7 @@ fitness delta, and commits improvements or rolls back regressions.
 ### Architecture
 
 ```
-src/autoresearch/
+organic_agentic_autodev/autoresearch/
 ├── contracts.py          # ExperimentV0, ExperimentResultV0, ImprovementCycleV0
 ├── proposer.py           # Generates typed experiment proposals
 ├── runner.py             # Executes fixed-budget experiment ticks
@@ -239,7 +239,7 @@ reading log lines.
 ### Architecture
 
 ```
-src/dashboard/
+organic_agentic_autodev/dashboard/
 ├── app.py                # FastAPI app + WebSocket broadcaster
 ├── router.py             # REST routes (/api/state, /api/history, /api/slos)
 ├── sim_runner.py         # Async simulation runner (wraps Environment.tick())
@@ -298,7 +298,7 @@ sharing a single persistent Mouseion, with inter-Body signal bridges.
 ### Architecture
 
 ```
-src/distributed/
+organic_agentic_autodev/distributed/
 ├── async_environment.py  # asyncio-native Environment (non-blocking tick)
 ├── runner.py             # AsyncSimulationRunner (N environments, shared Mouseion)
 ├── bridge.py             # Inter-Body signal bridge (SYNC signals cross boundaries)

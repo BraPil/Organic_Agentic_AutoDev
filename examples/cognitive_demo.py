@@ -26,11 +26,11 @@ import random
 
 logging.basicConfig(level=logging.WARNING)
 
-from src.cognition import CognitiveCell, build_system_prompt, get_provider
-from src.core.environment import Environment
-from src.domain.exmorbus import create_medical_genome, create_medical_niches, seed_mouseion
-from src.mouseion.contracts import AgentRole, ResourceKind
-from src.mouseion.substrate import Mouseion
+from organic_agentic_autodev.cognition import CognitiveCell, build_system_prompt, get_provider
+from organic_agentic_autodev.core.environment import Environment
+from organic_agentic_autodev.domain.exmorbus import create_medical_genome, create_medical_niches, seed_mouseion
+from organic_agentic_autodev.mouseion.contracts import AgentRole, ResourceKind
+from organic_agentic_autodev.mouseion.substrate import Mouseion
 
 
 def main(n_ticks: int = 20, seed: int = 42) -> None:

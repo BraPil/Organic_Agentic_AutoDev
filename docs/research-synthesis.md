@@ -13,7 +13,7 @@ environment, finding niches, specializing, and forming collective intelligence.
 
 **What we took:**
 1. **Mouseion Core v0** — the concept of a stable shared substrate with versioned
-   contracts. This became our `src/mouseion/contracts.py` and `substrate.py`.
+   contracts. This became our `organic_agentic_autodev/mouseion/contracts.py` and `substrate.py`.
 2. **MoltBook pattern** — shell/flesh separation for long-lived maintainability.
    Our contracts are shell; our LLM/vector store integrations are flesh.
 3. **Five-phase intelligence cycle** — the idea that intelligence goes through
@@ -150,5 +150,5 @@ ExMorbus             → Domain specialist Cell roles
 moltbook             → Shell/flesh separation throughout
 Physarum polycephalum → SlimeMoldNetwork + Pathfinder
 Stem cell biology    → StemCell + differentiation system
-The Mouseion         → src/mouseion/substrate.py
+The Mouseion         → organic_agentic_autodev/mouseion/substrate.py
 ```

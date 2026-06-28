@@ -5,10 +5,10 @@ tests/test_slime_mold.py — Tests for the SlimeMoldNetwork and Pathfinder.
 import random
 import pytest
 
-from src.slime_mold.network import SlimeMoldNetwork
-from src.slime_mold.pathfinder import Pathfinder
-from src.slime_mold.signal import Signal, SignalType
-from src.utils.helpers import new_id
+from organic_agentic_autodev.slime_mold.network import SlimeMoldNetwork
+from organic_agentic_autodev.slime_mold.pathfinder import Pathfinder
+from organic_agentic_autodev.slime_mold.signal import Signal, SignalType
+from organic_agentic_autodev.utils.helpers import new_id
 
 
 def make_signal(strength: float = 0.8, src: str = "a") -> Signal:
