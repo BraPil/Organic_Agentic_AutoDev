@@ -215,11 +215,11 @@ pytest
 - [x] Evolution engine (fitness, selection, mutation)
 - [x] ExMorbus domain specialization modules
 - [x] SLA / SLO / SLI observability layer
-- [ ] LLM-backed agent cognition (Anthropic / OpenAI integration) — `feature/llm-cognition`
-- [ ] Persistent Mouseion (SQLite backend + FAISS vector store) — `feature/persistent-mouseion`
-- [ ] Autoresearch autonomous self-improvement loop — `feature/autoresearch`
-- [ ] Web dashboard for observing emergent behavior — `feature/web-dashboard`
-- [ ] Multi-process / distributed ecosystem — `feature/distributed-ecosystem`
+- [x] LLM-backed agent cognition (Anthropic / OpenAI integration) — [`docs/llm-cognition.md`](docs/llm-cognition.md)
+- [x] Persistent Mouseion (SQLite backend + vector search) — [`docs/persistent-mouseion.md`](docs/persistent-mouseion.md)
+- [x] Autoresearch autonomous self-improvement loop — [`docs/autoresearch.md`](docs/autoresearch.md)
+- [x] Web dashboard for observing emergent behavior — [`docs/web-dashboard.md`](docs/web-dashboard.md)
+- [x] Multi-process / distributed ecosystem — [`docs/distributed-ecosystem.md`](docs/distributed-ecosystem.md)
 
 See [`docs/roadmap.md`](docs/roadmap.md) for the full implementation plan, and
 [`docs/runbook.md`](docs/runbook.md) for operational procedures.

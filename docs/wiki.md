@@ -13,6 +13,11 @@ Start here when onboarding or looking for "where does X live."
 | [architecture.md](architecture.md) | System layers, data flow, lifecycle, future layers |
 | [roadmap.md](roadmap.md) | Full implementation plan for remaining features |
 | [runbook.md](runbook.md) | How to run, debug, tune, deploy |
+| [llm-cognition.md](llm-cognition.md) | LLM-backed agent cognition (genome → prompt) |
+| [persistent-mouseion.md](persistent-mouseion.md) | SQLite backend + semantic vector search |
+| [autoresearch.md](autoresearch.md) | Autonomous self-improvement loop |
+| [web-dashboard.md](web-dashboard.md) | Live observability dashboard |
+| [distributed-ecosystem.md](distributed-ecosystem.md) | Multi-node / distributed ecosystem |
 | [stem-cell-agents.md](stem-cell-agents.md) | Drives, differentiation, reproduction |
 | [mouseion-substrate.md](mouseion-substrate.md) | Shared memory, contracts, resource pools |
 | [slime-mold-connections.md](slime-mold-connections.md) | Adaptive network, conductance, clustering |
