@@ -65,7 +65,7 @@ ANTHROPIC_API_KEY=sk-... python examples/cognitive_demo.py
 ## 3. Testing
 
 ```bash
-pytest                          # full suite (currently 160 tests)
+pytest                          # full suite (currently 251 tests)
 pytest tests/test_mouseion.py   # one module
 pytest -k "differentiation"     # by keyword
 pytest --cov=organic_agentic_autodev --cov-report=term-missing   # coverage

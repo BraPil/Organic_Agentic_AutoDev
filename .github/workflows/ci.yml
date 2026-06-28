@@ -1,0 +1,40 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    name: pytest (py${{ matrix.python-version }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.12"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+
+      - name: Install (dev + dashboard extras)
+        # dashboard extra pulls in fastapi/uvicorn so the dashboard route +
+        # websocket tests run instead of skipping. The cognition tests use the
+        # offline Mock/Deterministic providers, so no API key is required.
+        run: pip install -e ".[dev,dashboard]"
+
+      - name: Verify src-layout (no top-level `src` package)
+        run: |
+          python -c "import organic_agentic_autodev; print('package import OK')"
+          python -c "import src" 2>/dev/null && (echo 'ERROR: top-level src package still importable' && exit 1) || echo 'no top-level src package OK'
+
+      - name: Run tests
+        # No ANTHROPIC_API_KEY in CI — the suite must pass fully offline.
+        run: pytest -q
