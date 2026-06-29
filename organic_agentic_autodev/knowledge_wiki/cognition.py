@@ -121,6 +121,25 @@ class WikiCognition(ABC):
         """Return the page operations a source implies (create/update + links)."""
         raise NotImplementedError
 
+    @abstractmethod
+    def answer(self, *, question: str, pages: list[WikiPage]) -> str:
+        """Compose an answer to a question from the retrieved wiki pages."""
+        raise NotImplementedError
+
+
+def _compose_answer(question: str, pages: list[WikiPage]) -> str:
+    """Deterministic answer composition shared by both cognition impls."""
+    if not pages:
+        return "No relevant wiki pages were found for this question."
+    lines = [f"Based on {len(pages)} wiki page(s):"]
+    for page in pages:
+        facts = (
+            "; ".join(f"{k}={v}" for k, v in sorted(page.claims.items()))
+            or "(no structured facts)"
+        )
+        lines.append(f"- {page.title}: {facts}")
+    return "\n".join(lines)
+
 
 # ---------------------------------------------------------------------------
 # Deterministic (default, offline)
@@ -175,6 +194,9 @@ class DeterministicWikiCognition(WikiCognition):
             )
         ]
 
+    def answer(self, *, question: str, pages: list[WikiPage]) -> str:
+        return _compose_answer(question, pages)
+
 
 # ---------------------------------------------------------------------------
 # LLM-backed (live; degrades to deterministic on any failure)
@@ -217,6 +239,23 @@ class LLMWikiCognition(WikiCognition):
             topic=topic,
             existing_pages=existing_pages,
         )
+
+    def answer(self, *, question: str, pages: list[WikiPage]) -> str:
+        if not pages:
+            return _compose_answer(question, pages)
+        try:
+            context = "\n\n".join(f"## {p.title}\n{p.body}" for p in pages)
+            system = (
+                "Answer the question using ONLY the provided wiki pages. Be concise "
+                "and concrete. If the pages do not answer it, say so plainly."
+            )
+            prompt = f"QUESTION:\n{question}\n\nWIKI PAGES:\n{context}\n\nAnswer:"
+            text = sanitize_text(self._provider.generate(system, prompt)).strip()
+            if text:
+                return text
+        except Exception as exc:  # noqa: BLE001 — provider must never break query
+            logger.warning("LLM answer failed (%s); deterministic fallback", exc)
+        return _compose_answer(question, pages)
 
     # -- prompt + parse -----------------------------------------------------
 

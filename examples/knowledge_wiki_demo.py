@@ -1,15 +1,16 @@
 """
 examples/knowledge_wiki_demo.py
 
-Compounding Knowledge Wiki (Phase 1) — ingest demonstration.
+Compounding Knowledge Wiki (Phase 1) — ingest / query / lint demonstration.
 
-Shows the three behaviours of the ``ingest`` operation, fully offline (the
-deterministic cognition; no API key required):
-  1. A raw source becomes an LLM-owned wiki page (sources stay immutable).
-  2. A second source on the same topic *updates* the page (no duplicate) and
-     accumulates provenance.
-  3. Cross-references link related pages; contradictions are surfaced, not
-     silently overwritten.
+Fully offline (the deterministic cognition; no API key required):
+  1. ingest — a raw source becomes an LLM-owned wiki page (sources stay
+     immutable); a second source updates it (no duplicate); cross-references
+     link related pages; contradictions are surfaced, not silently overwritten.
+  2. query — a question retrieves the relevant pages and the grounded answer is
+     promoted into the durable store so it compounds.
+  3. lint — a structural health check (orphans, dangling links, contradictions,
+     stubs).
 
 Run:
     python examples/knowledge_wiki_demo.py
@@ -62,6 +63,20 @@ def main() -> None:
     sources = wiki.mouseion.query_knowledge(KnowledgeWiki.SOURCE_TAG)
     snapshots = wiki.mouseion.query_knowledge(KnowledgeWiki.PAGE_TAG)
     print(f"\nMouseion: {len(sources)} immutable sources, {len(snapshots)} page snapshots")
+
+    # --- query: ask a question; the grounded answer is promoted ---
+    print("\n" + "-" * 70)
+    answer = wiki.query("what does the stem cell read to decide?")
+    print(f"Q: {answer.question}")
+    print(f"A: {answer.answer}")
+    print(f"   (pages={answer.pages}, promoted={answer.promoted_record_id is not None})")
+
+    # --- lint: structural health check ---
+    print("\n" + "-" * 70)
+    report = wiki.lint()
+    print(f"lint: {report.summary()}")
+    if report.contradictions:
+        print(f"   contradictions: {[c.key for c in report.contradictions]}")
     print("=" * 70)
 
 

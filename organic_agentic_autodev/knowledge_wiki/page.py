@@ -100,3 +100,54 @@ class IngestResult:
     @property
     def changed(self) -> bool:
         return bool(self.pages_created or self.pages_updated)
+
+
+@dataclass
+class QueryResult:
+    """Outcome of one query — the answer, the pages it drew on, and whether the
+    answer was promoted into the durable store (compounding knowledge)."""
+
+    question: str
+    answer: str
+    pages: list[str] = field(default_factory=list)
+    grounded: bool = False
+    promoted_record_id: str | None = None
+
+
+@dataclass
+class LintReport:
+    """Health check over the wiki layer — Karpathy's ``lint`` operation.
+
+    Findings are structural and deterministic (no wall-clock): disconnected
+    pages, links to non-existent pages, referenced-but-missing concepts,
+    unresolved contradictions, and under-developed stubs.
+    """
+
+    page_count: int
+    orphans: list[str] = field(default_factory=list)
+    dangling_links: list[tuple[str, str]] = field(default_factory=list)
+    missing_concepts: list[str] = field(default_factory=list)
+    contradictions: list[Contradiction] = field(default_factory=list)
+    stubs: list[str] = field(default_factory=list)
+
+    @property
+    def healthy(self) -> bool:
+        return not (
+            self.orphans
+            or self.dangling_links
+            or self.missing_concepts
+            or self.contradictions
+            or self.stubs
+        )
+
+    def summary(self) -> str:
+        if self.healthy:
+            return f"wiki healthy — {self.page_count} page(s), no findings"
+        return (
+            f"wiki: {self.page_count} page(s) — "
+            f"{len(self.orphans)} orphan, "
+            f"{len(self.dangling_links)} dangling link, "
+            f"{len(self.missing_concepts)} missing concept, "
+            f"{len(self.contradictions)} contradiction, "
+            f"{len(self.stubs)} stub"
+        )

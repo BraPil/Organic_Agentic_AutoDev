@@ -23,6 +23,8 @@ data, it doesn't transform it).
 
 from __future__ import annotations
 
+from collections import defaultdict
+
 from organic_agentic_autodev.knowledge_wiki.cognition import (
     DeterministicWikiCognition,
     WikiCognition,
@@ -30,9 +32,12 @@ from organic_agentic_autodev.knowledge_wiki.cognition import (
 from organic_agentic_autodev.knowledge_wiki.page import (
     Contradiction,
     IngestResult,
+    LintReport,
     PageOp,
+    QueryResult,
     WikiPage,
 )
+from organic_agentic_autodev.knowledge_wiki.retrieval import relevance
 from organic_agentic_autodev.mouseion.substrate import Mouseion
 from organic_agentic_autodev.utils.helpers import get_logger, now_ms, sanitize_text
 
@@ -44,6 +49,11 @@ class KnowledgeWiki:
 
     SOURCE_TAG = "wiki:source"
     PAGE_TAG = "wiki:page"
+    ANSWER_TAG = "wiki:answer"
+
+    #: A page is a "stub" (lint finding) if it carries no structured claims and
+    #: its rendered body is shorter than this many characters.
+    STUB_MAX_LEN = 80
 
     #: Raw sources are stored at full fidelity — this is the *capture* confidence
     #: (a faithful copy of what was supplied), not a claim of truth.
@@ -134,6 +144,110 @@ class KnowledgeWiki:
             len(result.contradictions),
         )
         return result
+
+    # ------------------------------------------------------------------
+    # Query
+    # ------------------------------------------------------------------
+
+    def query(
+        self, question: str, *, k: int = 3, promote: bool = True
+    ) -> QueryResult:
+        """
+        Answer a question from the wiki. Relevant pages are retrieved and
+        composed into an answer; a grounded answer is *promoted* into the durable
+        store (tagged ``wiki:answer``, with provenance to the sources it drew on)
+        so valuable answers compound instead of vanishing.
+        """
+        safe_q = sanitize_text(question)
+        if not safe_q.strip():
+            raise ValueError("cannot query with an empty question")
+
+        # Rank deterministically: score desc, then slug for stable ties.
+        ranked = sorted(
+            ((relevance(safe_q, p), p) for p in self._pages.values()),
+            key=lambda pair: (-pair[0], pair[1].slug),
+        )
+        hits = [page for score, page in ranked if score > 0][:k]
+        answer = self._cog.answer(question=safe_q, pages=hits)
+        grounded = bool(hits)
+
+        promoted_id: str | None = None
+        if promote and grounded:
+            provenance: list[str] = []
+            for page in hits:
+                for ref in page.source_refs:
+                    if ref not in provenance:
+                        provenance.append(ref)
+            record = self._mouseion.store_knowledge(
+                author_id=self.ANSWER_TAG,
+                content=answer,
+                topic_tags=[self.ANSWER_TAG],
+                confidence=self.PAGE_CONFIDENCE,
+                provenance_refs=provenance,
+            )
+            promoted_id = record.record_id
+
+        logger.info(
+            "query %r → %d page(s), grounded=%s, promoted=%s",
+            safe_q[:60], len(hits), grounded, bool(promoted_id),
+        )
+        return QueryResult(
+            question=safe_q,
+            answer=answer,
+            pages=[p.slug for p in hits],
+            grounded=grounded,
+            promoted_record_id=promoted_id,
+        )
+
+    # ------------------------------------------------------------------
+    # Lint
+    # ------------------------------------------------------------------
+
+    def lint(self) -> LintReport:
+        """
+        Structural health check over the wiki layer. Detects disconnected pages
+        (orphans), links to non-existent pages (dangling), referenced-but-missing
+        concepts, unresolved contradictions, and under-developed stubs.
+
+        Deterministic by design — no wall-clock staleness (that needs a tick/
+        version baseline; deferred to keep lint reproducible).
+        """
+        slugs = set(self._pages)
+        inbound: dict[str, set[str]] = defaultdict(set)
+        outbound: dict[str, set[str]] = defaultdict(set)
+        dangling: list[tuple[str, str]] = []
+
+        for slug, page in self._pages.items():
+            for link in sorted(page.links):
+                outbound[slug].add(link)
+                if link in slugs:
+                    inbound[link].add(slug)
+                else:
+                    dangling.append((slug, link))
+
+        # A lone page is the whole wiki, not an orphan — only flag when >1 page.
+        orphans = (
+            sorted(s for s in slugs if not inbound[s] and not outbound[s])
+            if len(slugs) > 1
+            else []
+        )
+        missing = sorted({target for _, target in dangling})
+        stubs = sorted(
+            slug
+            for slug, page in self._pages.items()
+            if not page.claims and len(page.body) < self.STUB_MAX_LEN
+        )
+
+        report = LintReport(
+            page_count=len(self._pages),
+            orphans=orphans,
+            dangling_links=sorted(dangling),
+            missing_concepts=missing,
+            contradictions=self.contradictions(),
+            stubs=stubs,
+        )
+        logger.info("lint → %s", report.summary())
+        return report
 
     # ------------------------------------------------------------------
     # Internals

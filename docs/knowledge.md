@@ -64,19 +64,25 @@ Demo: `examples/knowledge_wiki_demo.py`.
 - snapshots each page version to a `KnowledgeRecordV0` tagged `wiki:page` with provenance back to
   its sources.
 
-### Query
-A question retrieves relevant wiki pages/records rather than re-deriving from raw sources each time.
-**A valuable answer is promoted into a new wiki entry** instead of disappearing into chat history —
-this is the "compounding" mechanism: the knowledge base gets richer with use.
+### Query — ✅ implemented (P1.3)
+`KnowledgeWiki.query(question)` retrieves the relevant pages (deterministic weighted token overlap —
+title 3×, claims 2×, body 1× — in `retrieval.py`; vector retrieval is the Phase 2 swap behind the
+same signature) and composes an answer from them. **A grounded answer is promoted into the durable
+store** (tagged `wiki:answer`, with provenance to the sources it drew on) instead of vanishing into
+chat history — the "compounding" mechanism. `promote=False` opts out; an ungrounded question (no
+matching page) is never promoted.
 
-### Lint
-Periodic health check over the wiki layer, surfacing:
-- **staleness** — records whose sources have moved on,
-- **orphans** — entries nothing links to,
-- **contradictions** — records that disagree,
-- **missing concepts** — gaps implied by the sources but not yet written.
+### Lint — ✅ implemented (P1.3)
+`KnowledgeWiki.lint()` is a deterministic structural health check over the wiki layer, surfacing:
+- **orphans** — pages disconnected from the link graph (only flagged when >1 page),
+- **dangling links** — links pointing at a slug with no page,
+- **missing concepts** — the unique referenced-but-absent slugs (Karpathy's "missing concepts"),
+- **contradictions** — the accumulated unresolved-conflict log,
+- **stubs** — under-developed pages (no claims + short body).
 
-Lint output is measurable (counts per category) and feeds `docs/evaluation.md` SLIs.
+`LintReport.healthy`/`summary()` make the result measurable (counts per category) for
+`docs/evaluation.md` SLIs. *Wall-clock staleness is deferred* — it needs a tick/version baseline, and
+lint must stay deterministic.
 
 ---
 
