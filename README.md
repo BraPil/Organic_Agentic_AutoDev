@@ -16,6 +16,36 @@ The result is a system that *grows*, *adapts*, and *improves itself* — not thr
 
 ---
 
+## What OAA Is (and How to Use It)
+
+OAA is a **standalone, self-improving agentic-swarm engine** — a reusable template,
+not a subcomponent of any one application. It is designed to be **cloned into or
+incorporated by other projects** whenever they need a self-organizing, self-improving
+swarm environment. Known consumers include
+[Agentic-AI-Architect](https://github.com/BraPil/Agentic-AI-Architect) (which uses OAA
+as its learning engine) and an upcoming ExMorbus update, with more to follow.
+
+Install it as a package and drive it from your own project:
+
+```bash
+pip install "git+https://github.com/BraPil/Organic_Agentic_AutoDev.git"
+python -c "import organic_agentic_autodev; print('engine ready')"
+```
+
+The package is `organic_agentic_autodev`. The generic OAA→consumer boundary is the
+cognition cycle, which emits provenance-bearing `KnowledgeRecordV0` artifacts a host
+project can review and promote:
+
+```bash
+oaa-learning-cycle --seed seed.json --out artifacts.jsonl
+```
+
+**This repo stays pristine and generic.** Application-specific glue (AAA's promotion
+gate, ExMorbus's domain seeds, etc.) lives in the consumer repos — OAA itself remains
+a clean, self-contained engine that any project can copy over and benefit from.
+
+---
+
 ## The Core Metaphor
 
 ### StemCell Agents (Atomic Units)

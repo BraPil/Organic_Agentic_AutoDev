@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "organic-agentic-autodev"
-version = "0.1.0"
+version = "0.2.0"
 description = "A bio-mimicking, self-developing, self-improving agentic architecture modeled on stem cell biology and slime mold growth patterns"
 readme = "README.md"
 requires-python = ">=3.11"
