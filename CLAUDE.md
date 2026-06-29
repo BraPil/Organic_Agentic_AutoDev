@@ -174,9 +174,9 @@ Phase 5 — Domain Grounding & Consumer Integration (deeper ExMorbus, APIs)  ⬜
 ```
 
 **Current phase priorities (Phase 1):**
-1. [P1.1] Author the load-bearing **schema doc** (`docs/knowledge.md`) defining wiki conventions and the ingest/query/lint workflows. *(seeded by this setup session)*
-2. [P1.2] Implement **ingest** over the Mouseion knowledge layer: new sources trigger LLM-maintained wiki-page updates with cross-referencing + contradiction detection. Offline-testable via deterministic provider.
-3. [P1.3] Implement **query** (answers retrieved from wiki, valuable answers promoted to new entries) and **lint** (detect staleness, orphans, contradictions, missing concepts).
+1. [P1.1] ✅ Author the load-bearing **schema doc** (`docs/knowledge.md`) defining wiki conventions and the ingest/query/lint workflows.
+2. [P1.2] ✅ Implement **ingest** over the Mouseion (`knowledge_wiki/`): sources stored immutably, synthesized into wiki pages with cross-referencing + contradiction detection, page snapshots persisted with provenance. Offline-tested via the deterministic cognition (22 tests).
+3. [P1.3] ⬜ Implement **query** (answers retrieved from wiki, valuable answers promoted to new entries) and **lint** (detect staleness, orphans, contradictions, missing concepts). The `WikiCognition` seam and the accumulated contradiction log are already in place for lint.
 
 **Phase discipline:** do not implement features belonging to a later phase until the current
 phase's success criteria are met. Phase definitions live in `docs/architecture.md`.

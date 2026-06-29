@@ -46,16 +46,23 @@ shell (`mouseion/contracts.py`, `domain/exmorbus/contracts.py`) — changing the
 
 ---
 
-## The wiki lifecycle: ingest / query / lint (Phase 1, building)
+## The wiki lifecycle: ingest / query / lint (Phase 1)
 
-Three operations, each offline-testable via the deterministic provider:
+Three operations, each offline-testable via the deterministic provider. Code lives in
+`organic_agentic_autodev/knowledge_wiki/` (`KnowledgeWiki` orchestrator + a `WikiCognition`
+synthesis seam with `DeterministicWikiCognition` default and `LLMWikiCognition` live impl).
+Demo: `examples/knowledge_wiki_demo.py`.
 
-### Ingest
-A new raw source triggers wiki maintenance across the related pages/records:
-- synthesize the source into the wiki layer (don't just store it verbatim),
-- cross-reference it against existing records (link related knowledge),
-- detect contradictions with what's already known and flag/reconcile them,
-- preserve provenance back to the immutable source.
+### Ingest — ✅ implemented (P1.2)
+`KnowledgeWiki.ingest(source)` triggers wiki maintenance across the related pages:
+- stores the raw source immutably as a `KnowledgeRecordV0` tagged `wiki:source`,
+- synthesizes it into the wiki layer (a `WikiPage`, not a verbatim copy) — the cognition layer
+  decides the page ops; the orchestrator only applies them,
+- cross-references it against existing pages (links by title/slug match),
+- detects contradictions (same claim key, different value) and **surfaces them, keeping the
+  existing value pending review** — never a silent overwrite,
+- snapshots each page version to a `KnowledgeRecordV0` tagged `wiki:page` with provenance back to
+  its sources.
 
 ### Query
 A question retrieves relevant wiki pages/records rather than re-deriving from raw sources each time.
