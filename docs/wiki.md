@@ -10,9 +10,19 @@ Start here when onboarding or looking for "where does X live."
 | Doc | Read it for |
 |-----|-------------|
 | [README](../README.md) | Vision, metaphor, quick start |
+| [../CLAUDE.md](../CLAUDE.md) | Session governance: mission, constitution, phases, DoD |
 | [architecture.md](architecture.md) | System layers, data flow, lifecycle, future layers |
 | [roadmap.md](roadmap.md) | Full implementation plan for remaining features |
 | [runbook.md](runbook.md) | How to run, debug, tune, deploy |
+| [governance.md](governance.md) | Protected paths (shell), ownership, approval gates |
+| [workflows.md](workflows.md) | Branching, commits, test command, PR process |
+| [knowledge.md](knowledge.md) | Knowledge types, storage, the compounding-wiki model |
+| [evaluation.md](evaluation.md) | Eval regimes, SLI/SLO, confidence policy |
+| [security.md](security.md) | Threat model, injection defense, secret hygiene |
+| [decision-log.md](decision-log.md) | Chronological architectural decisions |
+| [discovery-log.md](discovery-log.md) | Findings that affect future work |
+| [lessons-learned.md](lessons-learned.md) | Mistakes + preventive lessons |
+| [adr/](../adr/) | Architecture Decision Records |
 | [llm-cognition.md](llm-cognition.md) | LLM-backed agent cognition (genome → prompt) |
 | [persistent-mouseion.md](persistent-mouseion.md) | SQLite backend + semantic vector search |
 | [autoresearch.md](autoresearch.md) | Autonomous self-improvement loop |
