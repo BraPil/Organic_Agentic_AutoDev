@@ -101,22 +101,30 @@ class Proposer:
         self,
         env: Environment,
         recent_failures: set[str] | None = None,
+        *,
+        context_extra: dict[str, object] | None = None,
     ) -> tuple[ExperimentProposalV0, Checkpointer] | None:
         """
         Propose one experiment. Returns (proposal, bound checkpointer) or None if
         nothing viable / all candidates fail the compassion guard.
+
+        ``context_extra`` is merged into the state the cognition reasons over —
+        the caller (e.g. the runner) supplies signals the Proposer can't see
+        locally, such as a fitness trend across prior cycles.
         """
         recent_failures = recent_failures or set()
         types = [t for t in self.available_types() if t.value not in recent_failures]
         if not types:
             types = self.available_types()
 
+        context = self._context(env, recent_failures)
+        if context_extra:
+            context.update(context_extra)
+
         # Cognition decides the order to try (and may supply a rationale); it is
         # advisory. We honor its preference but guarantee every available type is
         # still tried and no invalid type is injected.
-        guidance = self._cognition.guide(
-            available_types=types, context=self._context(env, recent_failures)
-        )
+        guidance = self._cognition.guide(available_types=types, context=context)
         preferred = [t for t in guidance.ordered_types if t in types]
         ordered = preferred + [t for t in types if t not in preferred]
 

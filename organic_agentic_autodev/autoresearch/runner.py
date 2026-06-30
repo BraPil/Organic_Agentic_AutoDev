@@ -20,7 +20,8 @@ from __future__ import annotations
 
 import random
 from collections import deque
-from typing import TYPE_CHECKING, Callable
+from collections.abc import Callable
+from typing import TYPE_CHECKING
 
 from organic_agentic_autodev.autoresearch.contracts import (
     ExperimentResultV0,
@@ -48,8 +49,8 @@ class AutoResearchEngine:
         self,
         evaluator: EcosystemEvaluator | None = None,
         proposer: Proposer | None = None,
-        selector: "Selector | None" = None,
-        mutator: "Mutator | None" = None,
+        selector: Selector | None = None,
+        mutator: Mutator | None = None,
         experiment_ticks: int = 8,
         step_fn: Callable[[], None] | None = None,
         rng: random.Random | None = None,
@@ -66,10 +67,12 @@ class AutoResearchEngine:
     # Public API
     # ------------------------------------------------------------------
 
-    def run_cycle(self, env: "Environment") -> ImprovementCycleV0:
+    def run_cycle(self, env: Environment) -> ImprovementCycleV0:
         """Run one propose → test → commit/rollback cycle."""
         step = self._step_fn or env.tick
-        proposed = self._proposer.propose(env, set(self._recent_failures))
+        proposed = self._proposer.propose(
+            env, set(self._recent_failures), context_extra=self._fitness_context()
+        )
 
         if proposed is None:
             cycle = ImprovementCycleV0(
@@ -119,7 +122,30 @@ class AutoResearchEngine:
     # Internals
     # ------------------------------------------------------------------
 
-    def _measure(self, env: "Environment", step: Callable[[], None]) -> float:
+    def _fitness_context(self) -> dict[str, object]:
+        """
+        Summarize the recent fitness trajectory for the proposal cognition. The
+        runner owns the experiment history; the Proposer can't see it, so we hand
+        it across as advisory context (the cognition may reason over it; the
+        heuristic ignores it). Deterministic — derived from recorded deltas only.
+        """
+        deltas = [
+            c.result.delta for c in self._history[-3:] if c.result is not None
+        ]
+        if not deltas:
+            trend = "unknown"
+        elif sum(deltas) > IMPROVEMENT_THRESHOLD:
+            trend = "improving"
+        elif sum(deltas) < -IMPROVEMENT_THRESHOLD:
+            trend = "declining"
+        else:
+            trend = "flat"
+        return {
+            "fitness_trend": trend,
+            "recent_fitness_deltas": [round(d, 4) for d in deltas],
+        }
+
+    def _measure(self, env: Environment, step: Callable[[], None]) -> float:
         """Average ecosystem score across the experiment window."""
         self._evaluator.reset_baseline(env)
         scores: list[float] = []
@@ -128,7 +154,7 @@ class AutoResearchEngine:
             scores.append(self._evaluator.score(env))
         return sum(scores) / len(scores) if scores else 0.0
 
-    def _record_to_mouseion(self, env: "Environment", cycle: ImprovementCycleV0) -> None:
+    def _record_to_mouseion(self, env: Environment, cycle: ImprovementCycleV0) -> None:
         if cycle.result is None or cycle.proposal is None:
             return
         env.mouseion.store_knowledge(
