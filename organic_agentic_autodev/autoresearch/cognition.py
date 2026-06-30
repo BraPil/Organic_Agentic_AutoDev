@@ -36,17 +36,27 @@ from organic_agentic_autodev.utils.helpers import get_logger, sanitize_text
 logger = get_logger("autoresearch.cognition")
 
 
+#: The only perturbation directions a cognition may request. The Proposer maps
+#: these to bounded magnitudes; anything else is ignored (→ random direction).
+VALID_DIRECTIONS = ("increase", "decrease")
+
+
 @dataclass
 class ProposalGuidance:
-    """A cognition's advice: which experiment types to try, in order, and why.
+    """A cognition's advice: which experiment types to try, which way to nudge
+    each, and why.
 
     ``ordered_types`` is a *preference*. The Proposer filters it to the actually
     available types and appends any the cognition omitted, so every option is
-    still tried and no invalid type sneaks in. ``rationale`` (when non-empty)
+    still tried and no invalid type sneaks in. ``directions`` maps a type to
+    ``"increase"``/``"decrease"`` — a *direction* hint only; the Proposer still
+    owns the (bounded) magnitude and the compassion guard, and falls back to a
+    random direction when no valid hint is given. ``rationale`` (when non-empty)
     replaces the experiment's canned rationale with a data-grounded one.
     """
 
     ordered_types: list[ExperimentType] = field(default_factory=list)
+    directions: dict[ExperimentType, str] = field(default_factory=dict)
     rationale: str = ""
 
 
@@ -119,11 +129,12 @@ class LLMProposalCognition(ProposalCognition):
         system = (
             "You tune a self-organizing agent ecosystem's parameters. Given the "
             "available experiment types and the ecosystem's current state, rank the "
-            "experiments from most to least promising to try next, and explain "
-            "briefly. You choose ONLY the order and give a rationale — value bounds "
-            "and a compassion guard are enforced downstream, so never reason about "
-            "magnitudes or safety. "
-            'Return ONLY JSON: {"ranking":[type,...],"rationale":"..."}'
+            "experiments from most to least promising to try next, choose whether to "
+            "'increase' or 'decrease' each, and explain briefly. You choose ONLY the "
+            "order and the direction — the (bounded) magnitude and a compassion guard "
+            "are enforced downstream, so never reason about exact values or safety. "
+            'Return ONLY JSON: {"ranking":[type,...],'
+            '"directions":{type:"increase"|"decrease"},"rationale":"..."}'
         )
         state = "\n".join(f"- {k}: {v}" for k, v in sorted(context.items()))
         prompt = (
@@ -135,20 +146,31 @@ class LLMProposalCognition(ProposalCognition):
     @staticmethod
     def _parse(text: str, available_types: list[ExperimentType]) -> ProposalGuidance:
         data = _extract_json(text)
-        raw = data.get("ranking") if isinstance(data, dict) else None
+        if not isinstance(data, dict):
+            return ProposalGuidance()
         valid = {t.value: t for t in available_types}
+
         ordered: list[ExperimentType] = []
+        raw = data.get("ranking")
         if isinstance(raw, list):
             for item in raw:
                 etype = valid.get(str(item).strip().lower())
                 if etype is not None and etype not in ordered:
                     ordered.append(etype)
-        rationale = (
-            sanitize_text(str(data.get("rationale", ""))).strip()
-            if isinstance(data, dict)
-            else ""
+
+        directions: dict[ExperimentType, str] = {}
+        raw_dirs = data.get("directions")
+        if isinstance(raw_dirs, dict):
+            for key, value in raw_dirs.items():
+                etype = valid.get(str(key).strip().lower())
+                direction = str(value).strip().lower()
+                if etype is not None and direction in VALID_DIRECTIONS:
+                    directions[etype] = direction
+
+        rationale = sanitize_text(str(data.get("rationale", ""))).strip()
+        return ProposalGuidance(
+            ordered_types=ordered, directions=directions, rationale=rationale
         )
-        return ProposalGuidance(ordered_types=ordered, rationale=rationale)
 
 
 def _extract_json(text: str) -> dict[str, Any]:

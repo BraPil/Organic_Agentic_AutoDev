@@ -35,7 +35,7 @@
 
 **Success looks like:**
 - The repo stays **pristine and generic** — zero AAA-specific or ExMorbus-specific glue leaks into core modules (verifiable by grep + review).
-- The test suite stays **green and fully offline** (currently 326 passing; CI green on py3.11/3.12 with no API keys).
+- The test suite stays **green and fully offline** (currently 331 passing; CI green on py3.11/3.12 with no API keys).
 - Consumers integrate via the stable seams (package import + JSONL bridge) **without forking** core contracts.
 
 **Non-goals (explicit):**
@@ -185,8 +185,9 @@ Phase 5 — Domain Grounding & Consumer Integration (deeper ExMorbus, APIs)  ⬜
 - [B] ⬜ **Postgres `KnowledgeBackend`** — deferred (premature until real scale pressure; fights offline-first tests).
 
 **Phase 3 — in progress** (cognition depth):
-- [P3.1] ✅ **LLM cognition in autoresearch proposals** — `ProposalCognition` seam in `autoresearch/cognition.py`: `HeuristicProposalCognition` (default, random ordering via the seeded RNG) + `LLMProposalCognition` (behind the bridge `CognitionProvider`, falls back to heuristic on failure). The `Proposer` delegates *which experiment to try and a data-grounded rationale*; **all value bounds + the compassion guard stay in code**, so cognition can never produce an unsafe experiment (9 offline tests). ← here
-- Next candidates: LLM cognition for direction/magnitude (still guard-bounded); richer ecosystem context (fitness trend, energy headroom) in the proposal prompt.
+- [P3.1] ✅ **LLM cognition in autoresearch proposals** — `ProposalCognition` seam in `autoresearch/cognition.py`: `HeuristicProposalCognition` (default, random ordering via the seeded RNG) + `LLMProposalCognition` (behind the bridge `CognitionProvider`, falls back to heuristic on failure). The `Proposer` delegates *which experiment to try and a data-grounded rationale*; **all value bounds + the compassion guard stay in code**, so cognition can never produce an unsafe experiment.
+- [P3.2] ✅ **direction + richer context** — cognition also picks `increase`/`decrease` per experiment (the Proposer keeps the two bounded magnitudes + clamp + guard; invalid/missing → random fallback, preserving heuristic determinism), and the proposal context now carries `energy_level` alongside agent/niche counts (14 offline cognition tests total). ← here
+- Next candidates: thread fitness-trend into the context (needs runner plumbing); validate live-model proposal quality out-of-band.
 
 **Phase discipline:** do not implement features belonging to a later phase until the current
 phase's success criteria are met. Phase definitions live in `docs/architecture.md`.

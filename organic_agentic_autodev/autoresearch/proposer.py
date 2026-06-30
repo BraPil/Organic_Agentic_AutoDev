@@ -24,6 +24,7 @@ from organic_agentic_autodev.autoresearch.cognition import (
     ProposalCognition,
 )
 from organic_agentic_autodev.autoresearch.contracts import ExperimentProposalV0, ExperimentType
+from organic_agentic_autodev.mouseion.contracts import ResourceKind
 from organic_agentic_autodev.utils.helpers import clamp, get_logger, new_id
 
 if TYPE_CHECKING:
@@ -120,7 +121,12 @@ class Proposer:
         ordered = preferred + [t for t in types if t not in preferred]
 
         for etype in ordered:
-            built = self._build(etype, env, override_rationale=guidance.rationale or None)
+            built = self._build(
+                etype,
+                env,
+                override_rationale=guidance.rationale or None,
+                direction=guidance.directions.get(etype),
+            )
             if built is None:
                 continue
             proposal, checkpointer = built
@@ -137,6 +143,7 @@ class Proposer:
         return {
             "agent_count": len(env.all_agents()),
             "open_niches": len(env.open_niches()),
+            "energy_level": round(env.mouseion.resource_level(ResourceKind.ENERGY), 2),
             "available_experiments": [t.value for t in self.available_types()],
             "recently_failed": sorted(recent_failures),
         }
@@ -147,17 +154,30 @@ class Proposer:
         env: Environment,
         *,
         override_rationale: str | None = None,
+        direction: str | None = None,
     ) -> tuple[ExperimentProposalV0, Checkpointer] | None:
         cp = Checkpointer()
 
         def rationale(default: str) -> str:
             return override_rationale or default
 
+        def pick(down: float, up: float) -> float:
+            """Resolve the perturbation. Cognition picks the *direction*; the two
+            magnitudes (and the downstream clamp + guard) are fixed in code. With
+            no/invalid hint, fall back to a random direction — the heuristic
+            default, which keeps the RNG sequence (and existing tests) unchanged.
+            """
+            if direction == "increase":
+                return up
+            if direction == "decrease":
+                return down
+            return self.rng.choice([down, up])
+
         if etype == ExperimentType.ENERGY_REGEN:
             cp.bind(lambda: env.resource_regen_rate,
                     lambda v: setattr(env, "resource_regen_rate", v))
             old = cp.snapshot()
-            new = clamp(old * self.rng.choice([0.7, 1.4]), 0.0, 0.2)
+            new = clamp(old * pick(0.7, 1.4), 0.0, 0.2)
             return self._mk(etype, "global", old, new,
                             rationale("tune resource regeneration")), cp
 
@@ -169,7 +189,7 @@ class Proposer:
             cp.bind(lambda: niche.urgency_growth_rate,
                     lambda v: setattr(niche, "urgency_growth_rate", v))
             old = cp.snapshot()
-            new = clamp(old * self.rng.choice([0.6, 1.5]), 0.0, 0.1)
+            new = clamp(old * pick(0.6, 1.5), 0.0, 0.1)
             return self._mk(etype, niche.niche_id, old, new,
                             rationale("tune niche urgency growth")), cp
 
@@ -178,7 +198,7 @@ class Proposer:
             cp.bind(lambda: float(sel.carrying_capacity),
                     lambda v: setattr(sel, "carrying_capacity", int(v)))
             old = cp.snapshot()
-            new = max(2.0, old + self.rng.choice([-5.0, 5.0]))
+            new = max(2.0, old + pick(-5.0, 5.0))
             return self._mk(etype, "global", old, new,
                             rationale("tune population carrying capacity")), cp
 
@@ -187,7 +207,7 @@ class Proposer:
             cp.bind(lambda: sel.selection_strength,
                     lambda v: setattr(sel, "selection_strength", v))
             old = cp.snapshot()
-            new = clamp(old + self.rng.choice([-0.1, 0.1]), 0.0, 1.0)
+            new = clamp(old + pick(-0.1, 0.1), 0.0, 1.0)
             return self._mk(etype, "global", old, new,
                             rationale("tune selection strength")), cp
 
@@ -196,7 +216,7 @@ class Proposer:
             cp.bind(lambda: mut.base_rate,
                     lambda v: setattr(mut, "base_rate", v))
             old = cp.snapshot()
-            new = clamp(old + self.rng.choice([-0.02, 0.02]), 0.001, 0.5)
+            new = clamp(old + pick(-0.02, 0.02), 0.001, 0.5)
             return self._mk(etype, "global", old, new,
                             rationale("tune genome mutation rate")), cp
 

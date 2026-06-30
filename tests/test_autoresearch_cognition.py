@@ -37,16 +37,26 @@ class _StubProvider:
 
 
 class _FixedCognition(ProposalCognition):
-    """Forces a specific ordering + rationale, for testing the Proposer wiring."""
+    """Forces a specific ordering / direction / rationale, for Proposer wiring."""
 
     name = "fixed"
 
-    def __init__(self, order: list[ExperimentType], rationale: str = "") -> None:
+    def __init__(
+        self,
+        order: list[ExperimentType],
+        rationale: str = "",
+        directions: dict[ExperimentType, str] | None = None,
+    ) -> None:
         self._order = order
         self._rationale = rationale
+        self._directions = directions or {}
 
     def guide(self, *, available_types, context):
-        return ProposalGuidance(ordered_types=list(self._order), rationale=self._rationale)
+        return ProposalGuidance(
+            ordered_types=list(self._order),
+            directions=dict(self._directions),
+            rationale=self._rationale,
+        )
 
 
 # ---------------------------------------------------------------------------
@@ -134,3 +144,66 @@ def test_cognition_cannot_bypass_compassion_guard():
     proposal, _ = p.propose(_env())
     ok, _reason = p.passes_compassion_guard(proposal)
     assert ok
+
+
+# ---------------------------------------------------------------------------
+# Direction (P3.2) — cognition picks the way, code keeps the bounds
+# ---------------------------------------------------------------------------
+
+def test_llm_cognition_parses_directions_and_drops_invalid():
+    provider = _StubProvider(
+        '{"ranking": ["energy_regen"], '
+        '"directions": {"energy_regen": "increase", "mutation_rate": "sideways"}, '
+        '"rationale": ""}'
+    )
+    cog = LLMProposalCognition(provider=provider)
+    guidance = cog.guide(
+        available_types=[ExperimentType.ENERGY_REGEN, ExperimentType.MUTATION_RATE],
+        context={},
+    )
+    assert guidance.directions == {ExperimentType.ENERGY_REGEN: "increase"}
+
+
+def test_proposer_honors_increase_direction():
+    p = Proposer(
+        rng=random.Random(0),
+        cognition=_FixedCognition(
+            [ExperimentType.ENERGY_REGEN],
+            directions={ExperimentType.ENERGY_REGEN: "increase"},
+        ),
+    )
+    proposal, _ = p.propose(_env())
+    assert proposal.new_value > proposal.old_value
+
+
+def test_proposer_honors_decrease_direction():
+    p = Proposer(
+        rng=random.Random(0),
+        cognition=_FixedCognition(
+            [ExperimentType.ENERGY_REGEN],
+            directions={ExperimentType.ENERGY_REGEN: "decrease"},
+        ),
+    )
+    proposal, _ = p.propose(_env())
+    assert proposal.new_value < proposal.old_value
+
+
+def test_invalid_direction_falls_back_to_a_valid_proposal():
+    # An unrecognized direction is ignored (random fallback), never an error.
+    p = Proposer(
+        rng=random.Random(0),
+        cognition=_FixedCognition(
+            [ExperimentType.ENERGY_REGEN],
+            directions={ExperimentType.ENERGY_REGEN: "sideways"},
+        ),
+    )
+    built = p.propose(_env())
+    assert built is not None
+    assert built[0].experiment_type == ExperimentType.ENERGY_REGEN
+
+
+def test_context_includes_ecosystem_signals():
+    p = Proposer()
+    ctx = p._context(_env(), set())
+    assert "energy_level" in ctx
+    assert "agent_count" in ctx
