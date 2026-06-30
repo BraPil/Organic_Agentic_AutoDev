@@ -73,6 +73,13 @@ store** (tagged `wiki:answer`, with provenance to the sources it drew on) instea
 chat history — the "compounding" mechanism. `promote=False` opts out; an ungrounded question (no
 matching page) is never promoted.
 
+**Answer-reuse (Phase 2, slice D)** closes the loop: promoted answers re-enter retrieval. `query`
+(default `reuse_answers=True`) re-ranks prior `wiki:answer` records through the *same* `Retriever` (as a
+transient corpus, kept out of the lint graph), reports matches in `QueryResult.reused_answers`, and
+threads them into the next promotion's provenance — building a traceable compounding graph (new answer
+→ reused answers → sources). Page composition is untouched and `grounded` stays page-based, so reuse
+never drifts content or inflates the grounding SLI.
+
 ### Lint — ✅ implemented (P1.3)
 `KnowledgeWiki.lint()` is a deterministic structural health check over the wiki layer, surfacing:
 - **orphans** — pages disconnected from the link graph (only flagged when >1 page),

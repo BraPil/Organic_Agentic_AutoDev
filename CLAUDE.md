@@ -35,7 +35,7 @@
 
 **Success looks like:**
 - The repo stays **pristine and generic** — zero AAA-specific or ExMorbus-specific glue leaks into core modules (verifiable by grep + review).
-- The test suite stays **green and fully offline** (currently 310 passing; CI green on py3.11/3.12 with no API keys).
+- The test suite stays **green and fully offline** (currently 317 passing; CI green on py3.11/3.12 with no API keys).
 - Consumers integrate via the stable seams (package import + JSONL bridge) **without forking** core contracts.
 
 **Non-goals (explicit):**
@@ -181,7 +181,7 @@ Phase 5 — Domain Grounding & Consumer Integration (deeper ExMorbus, APIs)  ⬜
 **Phase 2 — in progress** (sequence C → A, defer B):
 - [C] ✅ **wiki health → observability SLI** — `WikiHealthMonitor` + `build_wiki_health_sla()` (`observability/wiki_health.py`, 10 offline tests). Four SLIs over `lint`/`query`: link integrity, orphan rate, contradiction count, query grounding. Passive observer reusing the shell SLI/SLO contracts; no new deps. Gives the grounding baseline that slice A is measured against.
 - [A] ✅ **pluggable wiki retrieval** — `Retriever` seam in `knowledge_wiki/retrieval.py`: `LexicalRetriever` (default, Phase 1 behavior) + `VectorRetriever` (cosine over the existing `Embedder`/`HashingEmbedder`, 10 offline tests). **No new dep.** FAISS/Qdrant deferred — they're a *scale* swap behind `VectorStore`, premature with no measured scale problem (same logic as B). Real semantic retrieval = inject `SentenceTransformerEmbedder`.
-- [D] ⬜ **answer-reuse** — promoted `wiki:answer` records re-retrieved by `query` (now has a home behind the `Retriever` seam). ← candidate next
+- [D] ✅ **answer-reuse** — promoted `wiki:answer` records re-enter retrieval via the same `Retriever` (transient corpus); reported in `QueryResult.reused_answers` + threaded into new-promotion provenance (7 offline tests). Page composition untouched; `grounded` stays page-based.
 - [B] ⬜ **Postgres `KnowledgeBackend`** — deferred (premature until real scale pressure; fights offline-first tests).
 
 **Phase discipline:** do not implement features belonging to a later phase until the current
