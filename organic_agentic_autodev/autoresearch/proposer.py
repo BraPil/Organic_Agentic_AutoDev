@@ -16,8 +16,13 @@ ecosystem), so apply/revert is fast and non-destructive.
 from __future__ import annotations
 
 import random
-from typing import TYPE_CHECKING, Any, Callable
+from collections.abc import Callable
+from typing import TYPE_CHECKING
 
+from organic_agentic_autodev.autoresearch.cognition import (
+    HeuristicProposalCognition,
+    ProposalCognition,
+)
 from organic_agentic_autodev.autoresearch.contracts import ExperimentProposalV0, ExperimentType
 from organic_agentic_autodev.utils.helpers import clamp, get_logger, new_id
 
@@ -65,13 +70,18 @@ class Proposer:
 
     def __init__(
         self,
-        selector: "Selector | None" = None,
-        mutator: "Mutator | None" = None,
+        selector: Selector | None = None,
+        mutator: Mutator | None = None,
         rng: random.Random | None = None,
+        cognition: ProposalCognition | None = None,
     ) -> None:
         self._selector = selector
         self._mutator = mutator
         self.rng = rng or random.Random()
+        # Strategy (which experiment, in what order) is delegated; mechanics and
+        # the compassion guard stay here. Default heuristic shares the RNG, so
+        # behaviour stays deterministic and reproducible.
+        self._cognition = cognition or HeuristicProposalCognition(self.rng)
 
     # ------------------------------------------------------------------
     # Proposal generation
@@ -88,7 +98,7 @@ class Proposer:
 
     def propose(
         self,
-        env: "Environment",
+        env: Environment,
         recent_failures: set[str] | None = None,
     ) -> tuple[ExperimentProposalV0, Checkpointer] | None:
         """
@@ -99,10 +109,18 @@ class Proposer:
         types = [t for t in self.available_types() if t.value not in recent_failures]
         if not types:
             types = self.available_types()
-        self.rng.shuffle(types)
 
-        for etype in types:
-            built = self._build(etype, env)
+        # Cognition decides the order to try (and may supply a rationale); it is
+        # advisory. We honor its preference but guarantee every available type is
+        # still tried and no invalid type is injected.
+        guidance = self._cognition.guide(
+            available_types=types, context=self._context(env, recent_failures)
+        )
+        preferred = [t for t in guidance.ordered_types if t in types]
+        ordered = preferred + [t for t in types if t not in preferred]
+
+        for etype in ordered:
+            built = self._build(etype, env, override_rationale=guidance.rationale or None)
             if built is None:
                 continue
             proposal, checkpointer = built
@@ -112,10 +130,28 @@ class Proposer:
             logger.info("Compassion guard rejected %s: %s", etype.value, reason)
         return None
 
+    def _context(
+        self, env: Environment, recent_failures: set[str]
+    ) -> dict[str, object]:
+        """Snapshot of ecosystem state a cognition may reason over (read-only)."""
+        return {
+            "agent_count": len(env.all_agents()),
+            "open_niches": len(env.open_niches()),
+            "available_experiments": [t.value for t in self.available_types()],
+            "recently_failed": sorted(recent_failures),
+        }
+
     def _build(
-        self, etype: ExperimentType, env: "Environment"
+        self,
+        etype: ExperimentType,
+        env: Environment,
+        *,
+        override_rationale: str | None = None,
     ) -> tuple[ExperimentProposalV0, Checkpointer] | None:
         cp = Checkpointer()
+
+        def rationale(default: str) -> str:
+            return override_rationale or default
 
         if etype == ExperimentType.ENERGY_REGEN:
             cp.bind(lambda: env.resource_regen_rate,
@@ -123,7 +159,7 @@ class Proposer:
             old = cp.snapshot()
             new = clamp(old * self.rng.choice([0.7, 1.4]), 0.0, 0.2)
             return self._mk(etype, "global", old, new,
-                            "tune resource regeneration"), cp
+                            rationale("tune resource regeneration")), cp
 
         if etype == ExperimentType.NICHE_URGENCY_GROWTH:
             open_niches = env.open_niches()
@@ -135,7 +171,7 @@ class Proposer:
             old = cp.snapshot()
             new = clamp(old * self.rng.choice([0.6, 1.5]), 0.0, 0.1)
             return self._mk(etype, niche.niche_id, old, new,
-                            "tune niche urgency growth"), cp
+                            rationale("tune niche urgency growth")), cp
 
         if etype == ExperimentType.CARRYING_CAPACITY and self._selector is not None:
             sel = self._selector
@@ -144,7 +180,7 @@ class Proposer:
             old = cp.snapshot()
             new = max(2.0, old + self.rng.choice([-5.0, 5.0]))
             return self._mk(etype, "global", old, new,
-                            "tune population carrying capacity"), cp
+                            rationale("tune population carrying capacity")), cp
 
         if etype == ExperimentType.SELECTION_STRENGTH and self._selector is not None:
             sel = self._selector
@@ -153,7 +189,7 @@ class Proposer:
             old = cp.snapshot()
             new = clamp(old + self.rng.choice([-0.1, 0.1]), 0.0, 1.0)
             return self._mk(etype, "global", old, new,
-                            "tune selection strength"), cp
+                            rationale("tune selection strength")), cp
 
         if etype == ExperimentType.MUTATION_RATE and self._mutator is not None:
             mut = self._mutator
@@ -162,7 +198,7 @@ class Proposer:
             old = cp.snapshot()
             new = clamp(old + self.rng.choice([-0.02, 0.02]), 0.001, 0.5)
             return self._mk(etype, "global", old, new,
-                            "tune genome mutation rate"), cp
+                            rationale("tune genome mutation rate")), cp
 
         return None
 

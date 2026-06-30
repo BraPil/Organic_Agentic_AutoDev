@@ -35,7 +35,7 @@
 
 **Success looks like:**
 - The repo stays **pristine and generic** — zero AAA-specific or ExMorbus-specific glue leaks into core modules (verifiable by grep + review).
-- The test suite stays **green and fully offline** (currently 317 passing; CI green on py3.11/3.12 with no API keys).
+- The test suite stays **green and fully offline** (currently 326 passing; CI green on py3.11/3.12 with no API keys).
 - Consumers integrate via the stable seams (package import + JSONL bridge) **without forking** core contracts.
 
 **Non-goals (explicit):**
@@ -167,8 +167,8 @@ Full protected-path list and ownership: `docs/governance.md`.
 ```
 Phase 0 — Foundation (substrate→evolution, 5 features, cognition bridge)   ✅ COMPLETE
 Phase 1 — Compounding Knowledge Wiki (Karpathy ingest/query/lint)          ✅ COMPLETE
-Phase 2 — Knowledge Scale & Retrieval (FAISS/Qdrant, Postgres backend)     🔶 IN PROGRESS  ← here
-Phase 3 — Cognition Depth (LLM cognition inside autoresearch proposals)    ⬜ NOT STARTED
+Phase 2 — Knowledge Scale & Retrieval (FAISS/Qdrant, Postgres backend)     ✅ CORE COMPLETE (Postgres deferred)
+Phase 3 — Cognition Depth (LLM cognition inside autoresearch proposals)    🔶 IN PROGRESS  ← here
 Phase 4 — Distributed Hardening (multi-machine deploy)                     ⬜ NOT STARTED
 Phase 5 — Domain Grounding & Consumer Integration (deeper ExMorbus, APIs)  ⬜ NOT STARTED
 ```
@@ -183,6 +183,10 @@ Phase 5 — Domain Grounding & Consumer Integration (deeper ExMorbus, APIs)  ⬜
 - [A] ✅ **pluggable wiki retrieval** — `Retriever` seam in `knowledge_wiki/retrieval.py`: `LexicalRetriever` (default, Phase 1 behavior) + `VectorRetriever` (cosine over the existing `Embedder`/`HashingEmbedder`, 10 offline tests). **No new dep.** FAISS/Qdrant deferred — they're a *scale* swap behind `VectorStore`, premature with no measured scale problem (same logic as B). Real semantic retrieval = inject `SentenceTransformerEmbedder`.
 - [D] ✅ **answer-reuse** — promoted `wiki:answer` records re-enter retrieval via the same `Retriever` (transient corpus); reported in `QueryResult.reused_answers` + threaded into new-promotion provenance (7 offline tests). Page composition untouched; `grounded` stays page-based.
 - [B] ⬜ **Postgres `KnowledgeBackend`** — deferred (premature until real scale pressure; fights offline-first tests).
+
+**Phase 3 — in progress** (cognition depth):
+- [P3.1] ✅ **LLM cognition in autoresearch proposals** — `ProposalCognition` seam in `autoresearch/cognition.py`: `HeuristicProposalCognition` (default, random ordering via the seeded RNG) + `LLMProposalCognition` (behind the bridge `CognitionProvider`, falls back to heuristic on failure). The `Proposer` delegates *which experiment to try and a data-grounded rationale*; **all value bounds + the compassion guard stay in code**, so cognition can never produce an unsafe experiment (9 offline tests). ← here
+- Next candidates: LLM cognition for direction/magnitude (still guard-bounded); richer ecosystem context (fitness trend, energy headroom) in the proposal prompt.
 
 **Phase discipline:** do not implement features belonging to a later phase until the current
 phase's success criteria are met. Phase definitions live in `docs/architecture.md`.
