@@ -96,3 +96,36 @@ python examples/autoresearch_demo.py
 
 Runs 12 self-improvement cycles over a 20-agent colony, committing improvements
 and reverting regressions, with every experiment logged to the Mouseion.
+
+## Proposal cognition (Phase 3, P3.1)
+
+How an experiment is *chosen* is a swappable `ProposalCognition`
+(`autoresearch/cognition.py`); how it is *built and bounded* is not. The cognition
+decides the **order** experiment types are tried and may supply a data-grounded
+**rationale** — but every value bound, clamp, and the compassion guard stay in the
+`Proposer`. So cognition is advisory: it can reorder and explain, never produce an
+unsafe experiment.
+
+- `HeuristicProposalCognition` (default) — random ordering through the Proposer's
+  seeded RNG. Fully offline, reproducible, no reasoning. Existing behavior unchanged.
+- `LLMProposalCognition` — ranks experiments + writes a rationale via the bridge
+  `CognitionProvider` (Anthropic when keyed; mock/deterministic in tests). Falls
+  back to the heuristic on any transport/parse failure, so a misbehaving model
+  never blocks a proposal.
+
+```python
+from organic_agentic_autodev.autoresearch import Proposer, LLMProposalCognition
+proposer = Proposer(selector=sel, mutator=mut, cognition=LLMProposalCognition())
+```
+
+The cognition's ranking is filtered to actually-available types (and any it omits
+are still tried), so it can never remove options or inject an invalid one —
+compassion-as-first-class is enforced structurally, not by trusting the model.
+
+It also picks a **direction** (`increase`/`decrease`) per experiment (P3.2). The
+Proposer keeps the two bounded magnitudes, the clamp, and the guard — so the
+cognition chooses *which way*, code decides *how far* and *whether it's safe*. A
+missing or unrecognized direction falls back to a random one (the heuristic
+default), which also keeps existing runs reproducible. The proposal context the
+cognition sees includes `energy_level`, `agent_count`, `open_niches`, and the
+recently-failed experiment types.

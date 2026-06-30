@@ -161,11 +161,13 @@ compassion impact.
 This is deliberate: we want a system that cares about the wellbeing of its
 own members and, by extension, the humans and AI it serves.
 
-## Future Architecture (Planned Layers)
+## Extended Architecture (Built as Flesh)
 
-The following components extend the existing architecture without altering its
-shell contracts. Each maps onto an existing layer as *flesh* per the MoltBook
-pattern. See `docs/roadmap.md` for full design detail.
+The following components extend the core architecture **without altering its
+shell contracts** — each maps onto an existing layer as *flesh* per the MoltBook
+pattern. All of these are now **implemented** (Phase 0 features + the Phase 1–3
+knowledge/cognition work); this section documents how they attach. See
+`CLAUDE.md` §8 for live phase status and `docs/roadmap.md` for design detail.
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
@@ -185,7 +187,16 @@ pattern. See `docs/roadmap.md` for full design detail.
 │  AUTORESEARCH (flesh on Layer 4: Body self-improvement)             │
 │  • Proposer → Runner → Evaluator → commit/rollback                  │
 │  • Fixed-budget experiments on system parameters                    │
-│  • Compassion guard rejects harmful proposals                       │
+│  • Compassion guard rejects harmful proposals (stays in code)       │
+│  • ProposalCognition seam (Phase 3): LLM picks order + direction +  │
+│    rationale; bounds/guard never leave the Proposer                 │
+└─────────────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────┐
+│  KNOWLEDGE WIKI (flesh on Layer 0: Mouseion) — Phase 1–2            │
+│  • Karpathy ingest / query / lint over KnowledgeRecordV0 (tagged)   │
+│  • WikiCognition seam (deterministic default / LLM) for synthesis   │
+│  • Pluggable Retriever (lexical default / vector); answer-reuse     │
+│  • WikiHealthMonitor → lint/query health as observability SLIs      │
 └─────────────────────────────────────────────────────────────────────┘
 ┌─────────────────────────────────────────────────────────────────────┐
 │  DASHBOARD (observer; reads all layers)                             │
@@ -201,7 +212,7 @@ pattern. See `docs/roadmap.md` for full design detail.
 
 ### Why these are flesh, not shell
 
-None of the planned components require a change to `mouseion/contracts.py`,
+None of these components required a change to `mouseion/contracts.py`,
 `genome.py`, or `signal.py` (the shell). They attach to existing extension
 points:
 
@@ -210,6 +221,10 @@ points:
 - **Autoresearch** fills in the existing `Body._self_improvement_cycle()` stub
 - **Dashboard** is a read-only observer using existing `snapshot()` methods
 - **Distributed** orchestrates existing `Environment.tick()` loops
+- **Knowledge wiki** rides on the stable `KnowledgeRecordV0` contract via tags
+  (`wiki:source`/`wiki:page`/`wiki:answer`) — no new `EventKind`, no shell edits
+- **Observability SLIs** for wiki health reuse the existing `SLIMeasurementV0` /
+  `SLODefinitionV0` contracts (only *additive* `SLIKind` enum members)
 
 This is the MoltBook promise validated: the architecture was designed so that
 the most significant new capabilities are additive flesh.

@@ -14,6 +14,12 @@ Public API:
 
 from __future__ import annotations
 
+from organic_agentic_autodev.autoresearch.cognition import (
+    HeuristicProposalCognition,
+    LLMProposalCognition,
+    ProposalCognition,
+    ProposalGuidance,
+)
 from organic_agentic_autodev.autoresearch.contracts import (
     ExperimentProposalV0,
     ExperimentResultV0,
@@ -36,4 +42,8 @@ __all__ = [
     "ExperimentProposalV0",
     "ExperimentResultV0",
     "ImprovementCycleV0",
+    "ProposalCognition",
+    "HeuristicProposalCognition",
+    "LLMProposalCognition",
+    "ProposalGuidance",
 ]

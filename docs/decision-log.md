@@ -104,4 +104,24 @@ Format: `### YYYY-MM-DD — <title>` · **Decision** · **Why** · **Consequence
 **Why:** Smallest change that closes the loop (Simplicity) while protecting correctness — no content feedback, no metric inflation, stable provenance. Reusing the existing `Retriever` seam (instead of a parallel answer-ranking path) keeps lexical/vector strategies applying uniformly to pages and answers. Fully offline + deterministic (7 new tests, 317 total).
 
 **Consequences:** Phase 2 slices A + C + D complete. The compounding graph is now traceable (new answer → reused prior answers → original sources). Two honest follow-ups left open: richer reuse could fold a strong prior-answer *into* composition or short-circuit recomputation (a cache), and near-duplicate promotions are not yet deduped — both deferred as they need a reliable similarity threshold (cf. the `HashingEmbedder` noise discovery, 2026-06-30). Remaining Phase 2 candidate: Postgres backend (still deferred, premature).
+
+---
+
+### 2026-06-30 — Phase 2 → Phase 3 transition; slice P3.1: LLM cognition in autoresearch proposals
+
+**Decision:** Treat Phase 2 as **core-complete with Postgres deferred** and open **Phase 3 (cognition depth)**, per explicit user direction. First slice: add a `ProposalCognition` seam to autoresearch (`autoresearch/cognition.py`) — `HeuristicProposalCognition` (default, random ordering through the Proposer's seeded RNG) + `LLMProposalCognition` (behind the bridge `CognitionProvider`, falls back to heuristic on any failure). The `Proposer` delegates **strategy** (which experiment type to try first + a data-grounded `rationale`) to the cognition, while keeping **all mechanics in code**: value bounds/clamps and the compassion guard never move into the cognition. Cognition output is sanitized — its ordering is filtered to actually-available types and any omitted types are still appended, so it can reorder but never remove options or inject an invalid/unsafe one.
+
+**Why:** Honors the established cognition pattern (ABC + deterministic offline default + graceful LLM, mirroring `WikiCognition` and the bridge) and the offline-first mandate (9 new tests, 326 total, stub provider — no network). Critically, **compassion-as-first-class is enforced structurally**: because bounds + the guard live in the Proposer, an LLM (or a buggy/adversarial one) cannot ship a starving/lethal/destabilising experiment — the worst it can do is reorder safe options. Additive flesh: no shell contract changed (only additive `__init__` exports); the default behavior (and every existing autoresearch test) is unchanged because the default heuristic shares the RNG.
+
+**Consequences:** Phase 3 in progress. Natural next slices (still guard-bounded): let cognition choose perturbation *direction/magnitude* (not just order), and enrich the prompt context with fitness trend / energy headroom so the rationale is genuinely data-driven. As with the wiki LLM paths, real-model behavior is validated out-of-band (discovery-log), never in CI.
+
+---
+
+### 2026-06-30 — Phase 3 slice P3.2: cognition picks direction; enriched proposal context
+
+**Decision:** Extend `ProposalCognition` so it chooses the perturbation **direction** (`increase`/`decrease`) per experiment, not just the order. `ProposalGuidance` gains a `directions: dict[ExperimentType, str]`; the Proposer's `_build` resolves each via a `pick(down, up)` helper — the **two bounded magnitudes stay fixed in code**, and an absent/invalid hint falls back to a *random* direction (the heuristic default). The proposal `context` is enriched with `energy_level` (read from the Mouseion energy pool) alongside agent/niche counts, so the LLM has real state to reason over. Only `"increase"`/`"decrease"` are accepted (a `VALID_DIRECTIONS` allowlist); anything else is dropped at parse time.
+
+**Why:** This is the actual "cognition depth" step — the model now influences *which way* to nudge a parameter, informed by ecosystem state, not just the trial order. Crucially the safety envelope is unchanged: magnitudes, the clamp, and the compassion guard all remain in code, so the worst a misbehaving model can do is pick a (still-bounded) direction. The random fallback for missing/invalid directions keeps the RNG draw sequence identical to before, so every pre-existing autoresearch test stays green (offline; 14 cognition tests total).
+
+**Consequences:** P3.1 + P3.2 complete on `feature/autoresearch-proposal-cognition`. Remaining Phase 3 candidate: thread a **fitness trend** into the context — deferred because it needs plumbing from the runner/evaluator (which holds the fitness history) into `propose()`, a larger change than this slice. Live-model proposal quality is validated out-of-band, never in CI.
 </content>
