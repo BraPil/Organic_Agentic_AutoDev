@@ -37,7 +37,10 @@ from organic_agentic_autodev.knowledge_wiki.page import (
     QueryResult,
     WikiPage,
 )
-from organic_agentic_autodev.knowledge_wiki.retrieval import relevance
+from organic_agentic_autodev.knowledge_wiki.retrieval import (
+    LexicalRetriever,
+    Retriever,
+)
 from organic_agentic_autodev.mouseion.substrate import Mouseion
 from organic_agentic_autodev.utils.helpers import get_logger, now_ms, sanitize_text
 
@@ -66,12 +69,17 @@ class KnowledgeWiki:
         self,
         mouseion: Mouseion | None = None,
         cognition: WikiCognition | None = None,
+        retriever: Retriever | None = None,
     ) -> None:
         self._mouseion = mouseion or Mouseion()
         self._cog = cognition or DeterministicWikiCognition()
+        self._retriever = retriever or LexicalRetriever()
         self._pages: dict[str, WikiPage] = {}
         self._contradictions: list[Contradiction] = []
-        logger.info("KnowledgeWiki ready (cognition=%s)", self._cog.name)
+        logger.info(
+            "KnowledgeWiki ready (cognition=%s, retriever=%s)",
+            self._cog.name, self._retriever.name,
+        )
 
     # ------------------------------------------------------------------
     # Read API
@@ -162,12 +170,9 @@ class KnowledgeWiki:
         if not safe_q.strip():
             raise ValueError("cannot query with an empty question")
 
-        # Rank deterministically: score desc, then slug for stable ties.
-        ranked = sorted(
-            ((relevance(safe_q, p), p) for p in self._pages.values()),
-            key=lambda pair: (-pair[0], pair[1].slug),
-        )
-        hits = [page for score, page in ranked if score > 0][:k]
+        # Ranking is delegated to the retrieval strategy (lexical by default,
+        # vector when injected); it returns only grounded hits, most-relevant first.
+        hits = self._retriever.rank(safe_q, list(self._pages.values()), k=k)
         answer = self._cog.answer(question=safe_q, pages=hits)
         grounded = bool(hits)
 

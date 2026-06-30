@@ -24,7 +24,13 @@ from organic_agentic_autodev.knowledge_wiki.page import (
     WikiPage,
     slugify,
 )
-from organic_agentic_autodev.knowledge_wiki.retrieval import relevance, tokenize
+from organic_agentic_autodev.knowledge_wiki.retrieval import (
+    LexicalRetriever,
+    Retriever,
+    VectorRetriever,
+    relevance,
+    tokenize,
+)
 from organic_agentic_autodev.knowledge_wiki.wiki import KnowledgeWiki
 
 __all__ = [
@@ -41,4 +47,7 @@ __all__ = [
     "slugify",
     "tokenize",
     "relevance",
+    "Retriever",
+    "LexicalRetriever",
+    "VectorRetriever",
 ]

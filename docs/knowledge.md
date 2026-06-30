@@ -64,10 +64,11 @@ Demo: `examples/knowledge_wiki_demo.py`.
 - snapshots each page version to a `KnowledgeRecordV0` tagged `wiki:page` with provenance back to
   its sources.
 
-### Query — ✅ implemented (P1.3)
-`KnowledgeWiki.query(question)` retrieves the relevant pages (deterministic weighted token overlap —
-title 3×, claims 2×, body 1× — in `retrieval.py`; vector retrieval is the Phase 2 swap behind the
-same signature) and composes an answer from them. **A grounded answer is promoted into the durable
+### Query — ✅ implemented (P1.3); pluggable retrieval added (Phase 2, slice A)
+`KnowledgeWiki.query(question)` retrieves the relevant pages through a swappable `Retriever`
+(`retrieval.py`): `LexicalRetriever` (default — deterministic weighted token overlap, title 3×, claims
+2×, body 1×) or `VectorRetriever` (cosine over the existing `Embedder`/`HashingEmbedder`; inject
+`SentenceTransformerEmbedder` for real semantics, or FAISS/Qdrant behind `VectorStore` for scale) and composes an answer from them. **A grounded answer is promoted into the durable
 store** (tagged `wiki:answer`, with provenance to the sources it drew on) instead of vanishing into
 chat history — the "compounding" mechanism. `promote=False` opts out; an ungrounded question (no
 matching page) is never promoted.
