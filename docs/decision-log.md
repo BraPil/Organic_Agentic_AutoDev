@@ -124,4 +124,14 @@ Format: `### YYYY-MM-DD — <title>` · **Decision** · **Why** · **Consequence
 **Why:** This is the actual "cognition depth" step — the model now influences *which way* to nudge a parameter, informed by ecosystem state, not just the trial order. Crucially the safety envelope is unchanged: magnitudes, the clamp, and the compassion guard all remain in code, so the worst a misbehaving model can do is pick a (still-bounded) direction. The random fallback for missing/invalid directions keeps the RNG draw sequence identical to before, so every pre-existing autoresearch test stays green (offline; 14 cognition tests total).
 
 **Consequences:** P3.1 + P3.2 complete on `feature/autoresearch-proposal-cognition`. Remaining Phase 3 candidate: thread a **fitness trend** into the context — deferred because it needs plumbing from the runner/evaluator (which holds the fitness history) into `propose()`, a larger change than this slice. Live-model proposal quality is validated out-of-band, never in CI.
+
+---
+
+### 2026-06-30 — Phase 3 slice P3.3: fitness trend in proposal context
+
+**Decision:** Close the deferred P3.2 follow-up. Add a generic `context_extra: dict` parameter to `Proposer.propose()` that is merged into the state the cognition reasons over. The **runner** (`AutoResearchEngine`), which owns the experiment history, computes a `_fitness_context()` — a `fitness_trend` label (improving / declining / flat / unknown, thresholded on the summed last-3 Δfitness against `IMPROVEMENT_THRESHOLD`) plus `recent_fitness_deltas` — and passes it on every `run_cycle`. The Proposer merges it without knowing it's about fitness.
+
+**Why:** The fitness trajectory is the single most decision-relevant signal for "what should I try next," and only the runner can see it. Routing it through a *generic* `context_extra` (rather than a fitness-specific `propose()` argument) keeps the Proposer decoupled from runner concepts and leaves the door open for any caller to inject other signals later — Simplicity + Replaceability. Determinism holds: the trend is derived only from recorded deltas, the heuristic default ignores context, and the existing `_build_prompt` renders new context keys automatically, so no prompt or test regressions (3 new tests; 334 total, offline).
+
+**Consequences:** Phase 3 cognition-depth core (P3.1 ordering + P3.2 direction + P3.3 trajectory-aware context) is in place. The LLM path now sees ecosystem state *and* its own self-improvement history. What remains is out-of-band live-model quality validation (a discovery-log activity, never CI), and any future Phase 3 depth (e.g. cognition proposing entirely new experiment *types*) — not scoped yet.
 </content>

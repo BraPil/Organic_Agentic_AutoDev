@@ -129,3 +129,12 @@ missing or unrecognized direction falls back to a random one (the heuristic
 default), which also keeps existing runs reproducible. The proposal context the
 cognition sees includes `energy_level`, `agent_count`, `open_niches`, and the
 recently-failed experiment types.
+
+The runner adds a **fitness trend** (P3.3). Because it owns the experiment
+history (something the Proposer can't see locally), it summarizes recent Δfitness
+into `fitness_trend` (improving / declining / flat / unknown) +
+`recent_fitness_deltas` and passes them via `propose(..., context_extra=…)`. So
+the cognition can reason over the self-improvement trajectory — e.g. "fitness is
+declining and energy_regen keeps reverting → try a different knob." The Proposer
+merges this generic `context_extra` without knowing it's about fitness, staying
+decoupled from runner concepts.

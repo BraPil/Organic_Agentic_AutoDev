@@ -11,14 +11,22 @@ from __future__ import annotations
 import random
 
 from organic_agentic_autodev.autoresearch import (
+    AutoResearchEngine,
     HeuristicProposalCognition,
     LLMProposalCognition,
     ProposalCognition,
     ProposalGuidance,
     Proposer,
 )
-from organic_agentic_autodev.autoresearch.contracts import ExperimentType
+from organic_agentic_autodev.autoresearch.contracts import (
+    ExperimentProposalV0,
+    ExperimentResultV0,
+    ExperimentType,
+    ImprovementCycleV0,
+)
 from organic_agentic_autodev.core.environment import Environment
+from organic_agentic_autodev.evolution.mutator import Mutator
+from organic_agentic_autodev.evolution.selector import Selector
 from organic_agentic_autodev.mouseion.substrate import Mouseion
 
 
@@ -207,3 +215,63 @@ def test_context_includes_ecosystem_signals():
     ctx = p._context(_env(), set())
     assert "energy_level" in ctx
     assert "agent_count" in ctx
+
+
+# ---------------------------------------------------------------------------
+# Fitness trend in context (P3.3) — runner supplies what the Proposer can't see
+# ---------------------------------------------------------------------------
+
+class _CapturingCognition(ProposalCognition):
+    """Records the context it was given, for asserting what reached the cognition."""
+
+    name = "capturing"
+
+    def __init__(self) -> None:
+        self.last_context: dict | None = None
+
+    def guide(self, *, available_types, context):
+        self.last_context = context
+        return ProposalGuidance(ordered_types=list(available_types))
+
+
+def _committed_cycle(delta: float) -> ImprovementCycleV0:
+    prop = ExperimentProposalV0(
+        experiment_id="e", experiment_type=ExperimentType.ENERGY_REGEN,
+        target="global", old_value=0.0, new_value=0.0,
+    )
+    res = ExperimentResultV0(
+        experiment_id="e", baseline_score=0.0, result_score=delta,
+        delta=delta, committed=delta > 0, ticks_run=2,
+    )
+    return ImprovementCycleV0(cycle_id="c", tick=0, proposal=prop, result=res)
+
+
+def test_propose_merges_context_extra_for_cognition():
+    cog = _CapturingCognition()
+    p = Proposer(rng=random.Random(0), cognition=cog)
+    p.propose(_env(), context_extra={"fitness_trend": "declining"})
+    assert cog.last_context["fitness_trend"] == "declining"
+    assert "energy_level" in cog.last_context  # base context still present
+
+
+def test_runner_passes_fitness_context_to_cognition():
+    cog = _CapturingCognition()
+    proposer = Proposer(
+        selector=Selector(), mutator=Mutator(), rng=random.Random(0), cognition=cog
+    )
+    engine = AutoResearchEngine(
+        proposer=proposer, experiment_ticks=2, step_fn=lambda: None, rng=random.Random(0)
+    )
+    engine.run_cycle(_env())
+    # First cycle: no history yet → "unknown", but the key is wired through.
+    assert cog.last_context["fitness_trend"] == "unknown"
+
+
+def test_fitness_trend_classification():
+    improving = AutoResearchEngine(step_fn=lambda: None)
+    improving._history.extend([_committed_cycle(0.1), _committed_cycle(0.1)])
+    assert improving._fitness_context()["fitness_trend"] == "improving"
+
+    declining = AutoResearchEngine(step_fn=lambda: None)
+    declining._history.extend([_committed_cycle(-0.1), _committed_cycle(-0.1)])
+    assert declining._fitness_context()["fitness_trend"] == "declining"
