@@ -37,7 +37,10 @@ from organic_agentic_autodev.knowledge_wiki.page import (
     QueryResult,
     WikiPage,
 )
-from organic_agentic_autodev.knowledge_wiki.retrieval import relevance
+from organic_agentic_autodev.knowledge_wiki.retrieval import (
+    LexicalRetriever,
+    Retriever,
+)
 from organic_agentic_autodev.mouseion.substrate import Mouseion
 from organic_agentic_autodev.utils.helpers import get_logger, now_ms, sanitize_text
 
@@ -66,12 +69,17 @@ class KnowledgeWiki:
         self,
         mouseion: Mouseion | None = None,
         cognition: WikiCognition | None = None,
+        retriever: Retriever | None = None,
     ) -> None:
         self._mouseion = mouseion or Mouseion()
         self._cog = cognition or DeterministicWikiCognition()
+        self._retriever = retriever or LexicalRetriever()
         self._pages: dict[str, WikiPage] = {}
         self._contradictions: list[Contradiction] = []
-        logger.info("KnowledgeWiki ready (cognition=%s)", self._cog.name)
+        logger.info(
+            "KnowledgeWiki ready (cognition=%s, retriever=%s)",
+            self._cog.name, self._retriever.name,
+        )
 
     # ------------------------------------------------------------------
     # Read API
@@ -150,26 +158,40 @@ class KnowledgeWiki:
     # ------------------------------------------------------------------
 
     def query(
-        self, question: str, *, k: int = 3, promote: bool = True
+        self,
+        question: str,
+        *,
+        k: int = 3,
+        promote: bool = True,
+        reuse_answers: bool = True,
     ) -> QueryResult:
         """
         Answer a question from the wiki. Relevant pages are retrieved and
         composed into an answer; a grounded answer is *promoted* into the durable
         store (tagged ``wiki:answer``, with provenance to the sources it drew on)
         so valuable answers compound instead of vanishing.
+
+        ``reuse_answers`` closes the compounding loop: prior promoted answers
+        re-enter retrieval (ranked by the *same* strategy as a transient corpus),
+        and the ones a question matches are reported in ``reused_answers`` and
+        threaded into the new answer's provenance. Page composition is left
+        untouched — reused answers are a structured signal + provenance link, not
+        merged prose, so promoted content never drifts answer-on-answer.
+        ``grounded`` stays strictly page-based (it drives the slice-C grounding
+        SLI), so reuse augments without inflating the metric.
         """
         safe_q = sanitize_text(question)
         if not safe_q.strip():
             raise ValueError("cannot query with an empty question")
 
-        # Rank deterministically: score desc, then slug for stable ties.
-        ranked = sorted(
-            ((relevance(safe_q, p), p) for p in self._pages.values()),
-            key=lambda pair: (-pair[0], pair[1].slug),
-        )
-        hits = [page for score, page in ranked if score > 0][:k]
+        # Ranking is delegated to the retrieval strategy (lexical by default,
+        # vector when injected); it returns only grounded hits, most-relevant first.
+        hits = self._retriever.rank(safe_q, list(self._pages.values()), k=k)
         answer = self._cog.answer(question=safe_q, pages=hits)
         grounded = bool(hits)
+
+        # Re-retrieve prior promoted answers over the same strategy (compounding).
+        reused = self._retrieve_prior_answers(safe_q, k=k) if reuse_answers else []
 
         promoted_id: str | None = None
         if promote and grounded:
@@ -178,6 +200,10 @@ class KnowledgeWiki:
                 for ref in page.source_refs:
                     if ref not in provenance:
                         provenance.append(ref)
+            # Link the compounding graph: new answer ← reused prior answers.
+            for ref in reused:
+                if ref not in provenance:
+                    provenance.append(ref)
             record = self._mouseion.store_knowledge(
                 author_id=self.ANSWER_TAG,
                 content=answer,
@@ -188,8 +214,8 @@ class KnowledgeWiki:
             promoted_id = record.record_id
 
         logger.info(
-            "query %r → %d page(s), grounded=%s, promoted=%s",
-            safe_q[:60], len(hits), grounded, bool(promoted_id),
+            "query %r → %d page(s), grounded=%s, promoted=%s, reused=%d",
+            safe_q[:60], len(hits), grounded, bool(promoted_id), len(reused),
         )
         return QueryResult(
             question=safe_q,
@@ -197,7 +223,29 @@ class KnowledgeWiki:
             pages=[p.slug for p in hits],
             grounded=grounded,
             promoted_record_id=promoted_id,
+            reused_answers=reused,
         )
+
+    _ANSWER_PREFIX = "answer:"
+
+    def _retrieve_prior_answers(self, question: str, *, k: int) -> list[str]:
+        """
+        Rank previously promoted ``wiki:answer`` records against the question
+        using the wiki's retrieval strategy, and return the matched record ids.
+
+        Prior answers are wrapped as a *transient* page corpus (never stored in
+        ``self._pages``, so they stay out of the lint link-graph) and scored by
+        the same ``Retriever`` as real pages — one retrieval mechanism, not two.
+        """
+        records = self._mouseion.query_knowledge(self.ANSWER_TAG)
+        if not records:
+            return []
+        transient = [
+            WikiPage(slug=f"{self._ANSWER_PREFIX}{r.record_id}", title="", body=r.content)
+            for r in records
+        ]
+        hits = self._retriever.rank(question, transient, k=k)
+        return [p.slug[len(self._ANSWER_PREFIX):] for p in hits]
 
     # ------------------------------------------------------------------
     # Lint

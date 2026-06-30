@@ -104,14 +104,16 @@ class IngestResult:
 
 @dataclass
 class QueryResult:
-    """Outcome of one query — the answer, the pages it drew on, and whether the
-    answer was promoted into the durable store (compounding knowledge)."""
+    """Outcome of one query — the answer, the pages it drew on, whether the
+    answer was promoted into the durable store (compounding knowledge), and which
+    prior promoted answers it reused (the answers re-entering retrieval)."""
 
     question: str
     answer: str
     pages: list[str] = field(default_factory=list)
     grounded: bool = False
     promoted_record_id: str | None = None
+    reused_answers: list[str] = field(default_factory=list)
 
 
 @dataclass

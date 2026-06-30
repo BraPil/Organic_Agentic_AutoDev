@@ -11,6 +11,10 @@ from organic_agentic_autodev.observability.contracts import (
 )
 from organic_agentic_autodev.observability.tracker import SLITracker
 from organic_agentic_autodev.observability.sla import build_medical_sla
+from organic_agentic_autodev.observability.wiki_health import (
+    WikiHealthMonitor,
+    build_wiki_health_sla,
+)
 
 __all__ = [
     "SLAContractV0",
@@ -22,4 +26,6 @@ __all__ = [
     "SLIWindowKind",
     "SLITracker",
     "build_medical_sla",
+    "WikiHealthMonitor",
+    "build_wiki_health_sla",
 ]

@@ -64,13 +64,21 @@ Demo: `examples/knowledge_wiki_demo.py`.
 - snapshots each page version to a `KnowledgeRecordV0` tagged `wiki:page` with provenance back to
   its sources.
 
-### Query — ✅ implemented (P1.3)
-`KnowledgeWiki.query(question)` retrieves the relevant pages (deterministic weighted token overlap —
-title 3×, claims 2×, body 1× — in `retrieval.py`; vector retrieval is the Phase 2 swap behind the
-same signature) and composes an answer from them. **A grounded answer is promoted into the durable
+### Query — ✅ implemented (P1.3); pluggable retrieval added (Phase 2, slice A)
+`KnowledgeWiki.query(question)` retrieves the relevant pages through a swappable `Retriever`
+(`retrieval.py`): `LexicalRetriever` (default — deterministic weighted token overlap, title 3×, claims
+2×, body 1×) or `VectorRetriever` (cosine over the existing `Embedder`/`HashingEmbedder`; inject
+`SentenceTransformerEmbedder` for real semantics, or FAISS/Qdrant behind `VectorStore` for scale) and composes an answer from them. **A grounded answer is promoted into the durable
 store** (tagged `wiki:answer`, with provenance to the sources it drew on) instead of vanishing into
 chat history — the "compounding" mechanism. `promote=False` opts out; an ungrounded question (no
 matching page) is never promoted.
+
+**Answer-reuse (Phase 2, slice D)** closes the loop: promoted answers re-enter retrieval. `query`
+(default `reuse_answers=True`) re-ranks prior `wiki:answer` records through the *same* `Retriever` (as a
+transient corpus, kept out of the lint graph), reports matches in `QueryResult.reused_answers`, and
+threads them into the next promotion's provenance — building a traceable compounding graph (new answer
+→ reused answers → sources). Page composition is untouched and `grounded` stays page-based, so reuse
+never drifts content or inflates the grounding SLI.
 
 ### Lint — ✅ implemented (P1.3)
 `KnowledgeWiki.lint()` is a deterministic structural health check over the wiki layer, surfacing:
@@ -83,6 +91,11 @@ matching page) is never promoted.
 `LintReport.healthy`/`summary()` make the result measurable (counts per category) for
 `docs/evaluation.md` SLIs. *Wall-clock staleness is deferred* — it needs a tick/version baseline, and
 lint must stay deterministic.
+
+**Health as an SLI (Phase 2, slice C):** `lint`/`query` health is now wired into the observability
+SLI/SLO framework via `WikiHealthMonitor` (`observability/wiki_health.py`) — a passive observer that
+turns a `lint()` pass + probe `query()`s into four SLIs (link integrity, orphan rate, contradiction
+count, query grounding) evaluated against `build_wiki_health_sla()`. See `docs/evaluation.md`.
 
 ---
 

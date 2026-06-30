@@ -35,7 +35,7 @@
 
 **Success looks like:**
 - The repo stays **pristine and generic** — zero AAA-specific or ExMorbus-specific glue leaks into core modules (verifiable by grep + review).
-- The test suite stays **green and fully offline** (currently 290 passing; CI green on py3.11/3.12 with no API keys).
+- The test suite stays **green and fully offline** (currently 317 passing; CI green on py3.11/3.12 with no API keys).
 - Consumers integrate via the stable seams (package import + JSONL bridge) **without forking** core contracts.
 
 **Non-goals (explicit):**
@@ -167,7 +167,7 @@ Full protected-path list and ownership: `docs/governance.md`.
 ```
 Phase 0 — Foundation (substrate→evolution, 5 features, cognition bridge)   ✅ COMPLETE
 Phase 1 — Compounding Knowledge Wiki (Karpathy ingest/query/lint)          ✅ COMPLETE
-Phase 2 — Knowledge Scale & Retrieval (FAISS/Qdrant, Postgres backend)     ⬜ NOT STARTED  ← next
+Phase 2 — Knowledge Scale & Retrieval (FAISS/Qdrant, Postgres backend)     🔶 IN PROGRESS  ← here
 Phase 3 — Cognition Depth (LLM cognition inside autoresearch proposals)    ⬜ NOT STARTED
 Phase 4 — Distributed Hardening (multi-machine deploy)                     ⬜ NOT STARTED
 Phase 5 — Domain Grounding & Consumer Integration (deeper ExMorbus, APIs)  ⬜ NOT STARTED
@@ -178,7 +178,11 @@ Phase 5 — Domain Grounding & Consumer Integration (deeper ExMorbus, APIs)  ⬜
 2. [P1.2] ✅ **ingest** — sources stored immutably, synthesized into wiki pages with cross-referencing + contradiction detection, page snapshots persisted with provenance.
 3. [P1.3] ✅ **query** (relevant pages retrieved, grounded answers promoted to the durable store with provenance) + **lint** (orphans, dangling links, missing concepts, contradictions, stubs).
 
-**Phase 2 candidate priorities (next):** real FAISS/Qdrant vector retrieval behind `retrieval.relevance`; Postgres `KnowledgeBackend`; wire `query`/`lint` into an SLI in the observability tracker. (Confirm scope before starting.)
+**Phase 2 — in progress** (sequence C → A, defer B):
+- [C] ✅ **wiki health → observability SLI** — `WikiHealthMonitor` + `build_wiki_health_sla()` (`observability/wiki_health.py`, 10 offline tests). Four SLIs over `lint`/`query`: link integrity, orphan rate, contradiction count, query grounding. Passive observer reusing the shell SLI/SLO contracts; no new deps. Gives the grounding baseline that slice A is measured against.
+- [A] ✅ **pluggable wiki retrieval** — `Retriever` seam in `knowledge_wiki/retrieval.py`: `LexicalRetriever` (default, Phase 1 behavior) + `VectorRetriever` (cosine over the existing `Embedder`/`HashingEmbedder`, 10 offline tests). **No new dep.** FAISS/Qdrant deferred — they're a *scale* swap behind `VectorStore`, premature with no measured scale problem (same logic as B). Real semantic retrieval = inject `SentenceTransformerEmbedder`.
+- [D] ✅ **answer-reuse** — promoted `wiki:answer` records re-enter retrieval via the same `Retriever` (transient corpus); reported in `QueryResult.reused_answers` + threaded into new-promotion provenance (7 offline tests). Page composition untouched; `grounded` stays page-based.
+- [B] ⬜ **Postgres `KnowledgeBackend`** — deferred (premature until real scale pressure; fights offline-first tests).
 
 **Phase discipline:** do not implement features belonging to a later phase until the current
 phase's success criteria are met. Phase definitions live in `docs/architecture.md`.
