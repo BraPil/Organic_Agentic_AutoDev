@@ -84,6 +84,11 @@ matching page) is never promoted.
 `docs/evaluation.md` SLIs. *Wall-clock staleness is deferred* — it needs a tick/version baseline, and
 lint must stay deterministic.
 
+**Health as an SLI (Phase 2, slice C):** `lint`/`query` health is now wired into the observability
+SLI/SLO framework via `WikiHealthMonitor` (`observability/wiki_health.py`) — a passive observer that
+turns a `lint()` pass + probe `query()`s into four SLIs (link integrity, orphan rate, contradiction
+count, query grounding) evaluated against `build_wiki_health_sla()`. See `docs/evaluation.md`.
+
 ---
 
 ## How this governs the repo's own docs

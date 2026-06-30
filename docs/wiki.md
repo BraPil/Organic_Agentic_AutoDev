@@ -54,6 +54,7 @@ Start here when onboarding or looking for "where does X live."
 | **Niche urgency** | Pressure that grows while a niche is unfilled | `core/niche.py` |
 | **ExMorbus** | Medical oncology domain specialisation | `domain/exmorbus/` |
 | **SLI / SLO / SLA** | Observability: indicator / objective / agreement | `observability/` |
+| **WikiHealthMonitor** | Passive observer turning wiki `lint`/`query` health into SLIs | `observability/wiki_health.py` |
 | **MoltBook pattern** | Shell (stable contracts) vs flesh (swappable impl) | architecture-wide |
 
 ---
@@ -69,6 +70,7 @@ Start here when onboarding or looking for "where does X live."
 | Add a new event | `mouseion/contracts.py` (`EventKind`), emit via `mouseion.emit()` |
 | Tune the network | `slime_mold/pathfinder.py` constants |
 | Add an SLO | `observability/sla.py`, add an SLI measure in `tracker.py` |
+| Measure wiki health | `observability/wiki_health.py` (`WikiHealthMonitor`, `build_wiki_health_sla`) |
 | Seed domain knowledge | `domain/exmorbus/seeder.py` (`_SEED_ENTRIES`) |
 | Change fitness weights | `evolution/fitness.py` (`FitnessVector.weights`) |
 

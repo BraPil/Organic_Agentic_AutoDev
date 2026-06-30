@@ -44,6 +44,11 @@ class SLIKind(str, Enum):
     KNOWLEDGE_GROWTH_RATE     = "knowledge_growth_rate"    # records per 10 ticks
     ORGAN_VIABILITY_RATE      = "organ_viability_rate"     # % organs viable
     ENERGY_HEADROOM           = "energy_headroom"          # % energy pool remaining
+    # --- Knowledge-wiki health (Phase 2: Karpathy lint/query → SLI) ---
+    WIKI_LINK_INTEGRITY       = "wiki_link_integrity"      # % wiki links that resolve
+    WIKI_ORPHAN_RATE          = "wiki_orphan_rate"         # % pages disconnected from graph
+    WIKI_CONTRADICTION_COUNT  = "wiki_contradiction_count" # unresolved claim conflicts
+    QUERY_GROUNDING_RATE      = "query_grounding_rate"     # % probe questions grounded
 
 
 class SLOStatus(str, Enum):
