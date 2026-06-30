@@ -60,12 +60,24 @@ python examples/cognitive_demo.py
 ANTHROPIC_API_KEY=sk-... python examples/cognitive_demo.py
 ```
 
+### Compounding knowledge wiki (Phase 1) + self-improvement (Phase 3)
+
+```bash
+python examples/knowledge_wiki_demo.py   # ingest → query → lint over the Mouseion
+python examples/autoresearch_demo.py     # propose → test → commit/rollback loop
+```
+
+Both run fully offline (deterministic cognition + retrieval). The wiki and the
+autoresearch proposer each accept an optional LLM seam (`LLMWikiCognition`,
+`LLMProposalCognition`) that activates only when a provider key is present and
+falls back to the deterministic path otherwise.
+
 ---
 
 ## 3. Testing
 
 ```bash
-pytest                          # full suite (currently 290 tests)
+pytest                          # full suite (currently 331 tests)
 pytest tests/test_mouseion.py   # one module
 pytest -k "differentiation"     # by keyword
 pytest --cov=organic_agentic_autodev --cov-report=term-missing   # coverage
@@ -113,6 +125,35 @@ network.detect_clusters(min_conductance=0.3)   # organ candidates
 print(tracker.dashboard_string())       # ASCII dashboard
 tracker.compliance_summary()            # structured compliance dict
 tracker.slo_status("slo_knowledge_confidence_floor")
+```
+
+### Drive the knowledge wiki (Phase 1)
+
+```python
+from organic_agentic_autodev.knowledge_wiki import KnowledgeWiki, VectorRetriever
+wiki = KnowledgeWiki()                       # default lexical retrieval
+wiki = KnowledgeWiki(retriever=VectorRetriever())  # cosine over HashingEmbedder
+wiki.ingest("topic: Genome\nEncodes eight traits.\ncount: 8")
+wiki.query("how many traits?")               # grounded answer is promoted (wiki:answer)
+wiki.lint()                                  # orphans / dangling / missing / contradictions / stubs
+```
+
+### Inspect knowledge-wiki health as SLIs (Phase 2)
+
+```python
+from organic_agentic_autodev.observability import WikiHealthMonitor
+monitor = WikiHealthMonitor(wiki, probe_questions=["how many traits?"])
+print(monitor.dashboard_string())            # link integrity / orphan rate / contradictions / grounding
+monitor.evaluate()["sla_compliant"]
+```
+
+### Enable LLM-backed autoresearch proposals (Phase 3)
+
+```python
+from organic_agentic_autodev.autoresearch import Proposer, LLMProposalCognition
+# Cognition is advisory (order + increase/decrease + rationale); bounds and the
+# compassion guard stay in the Proposer. Falls back to heuristic with no key.
+proposer = Proposer(selector=sel, mutator=mut, cognition=LLMProposalCognition())
 ```
 
 ---

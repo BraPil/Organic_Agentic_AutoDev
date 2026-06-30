@@ -202,13 +202,17 @@ examples/
 ├── basic_stem_cell.py    # Demonstrate a single StemCell lifecycle
 ├── colony_formation.py   # Watch a colony form and differentiate
 ├── organ_specialization.py  # Trace organ emergence from cell clusters
-└── medical_ecosystem.py  # Full ExMorbus oncology ecosystem + SLA tracking
-tests/                    # 160 passing tests
+├── medical_ecosystem.py  # Full ExMorbus oncology ecosystem + SLA tracking
+├── knowledge_wiki_demo.py   # Compounding knowledge wiki: ingest / query / lint
+└── autoresearch_demo.py  # Self-improvement loop (propose → test → commit/rollback)
+tests/                    # 331 passing tests (fully offline, no API keys)
 docs/
 ├── architecture.md       # System layers, data flow, lifecycle
+├── knowledge.md          # Compounding-knowledge-wiki model (Karpathy pattern)
 ├── roadmap.md            # Full implementation plan for remaining features
 ├── runbook.md            # Operational procedures (run, debug, deploy)
 ├── wiki.md              # Developer wiki / concept index
+├── decision-log.md       # Chronological architectural decisions
 ├── stem-cell-agents.md
 ├── mouseion-substrate.md
 ├── slime-mold-connections.md
@@ -250,15 +254,19 @@ pytest
 - [x] Autoresearch autonomous self-improvement loop — [`docs/autoresearch.md`](docs/autoresearch.md)
 - [x] Web dashboard for observing emergent behavior — [`docs/web-dashboard.md`](docs/web-dashboard.md)
 - [x] Multi-process / distributed ecosystem — [`docs/distributed-ecosystem.md`](docs/distributed-ecosystem.md)
+- [x] **Phase 1** — Compounding knowledge wiki (Karpathy ingest / query / lint) — [`docs/knowledge.md`](docs/knowledge.md)
+- [x] **Phase 2** — Wiki-health observability SLIs · pluggable (lexical/vector) retrieval · answer-reuse *(FAISS/Qdrant + Postgres deferred until a measured scale need)*
+- [~] **Phase 3** — LLM cognition inside autoresearch proposals (advisory ordering + direction; bounds & compassion guard stay in code) — [`docs/autoresearch.md`](docs/autoresearch.md)
 
-See [`docs/roadmap.md`](docs/roadmap.md) for the full implementation plan, and
+See [`docs/roadmap.md`](docs/roadmap.md) for the full implementation plan,
+[`CLAUDE.md`](CLAUDE.md) §8 for live phase status, and
 [`docs/runbook.md`](docs/runbook.md) for operational procedures.
 
 ---
 
 ## Status
 
-**Alpha proof of concept.** The architecture is fully specified and the core mechanics are implemented as pure Python (no LLM calls required to explore the dynamics). LLM integration is an optional layer on top of the working simulation.
+**Alpha proof of concept.** The architecture is fully specified and the core mechanics are implemented as pure Python (no LLM calls required to explore the dynamics). LLM integration is an optional layer on top of the working simulation. Phase 0 (foundation) and Phase 1 (compounding knowledge wiki) are complete; Phase 2 (knowledge retrieval/observability) is core-complete; Phase 3 (cognition depth) is in progress. The full suite is **331 offline tests**, green on py3.11/3.12 with no API keys.
 
 ---
 
