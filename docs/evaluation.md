@@ -8,7 +8,7 @@ OAA runs offline by default, so evaluation splits cleanly:
 
 1. **Deterministic engine** — seeded RNGs make every ecosystem run reproducible. Tests assert exact
    or bounded outcomes (resource conservation, differentiation irreversibility, cluster formation,
-   fitness ordering). This is the bulk of the 251-test suite.
+   fitness ordering). This is the bulk of the 290-test suite.
 2. **LLM-backed paths** (cognition cells, the Researcher→Critic→Synthesizer bridge) — evaluated
    against a **deterministic / mock provider** in tests. Live model behavior is validated manually,
    out of band, and the result recorded in `docs/discovery-log.md` (never in CI).

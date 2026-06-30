@@ -35,7 +35,7 @@
 
 **Success looks like:**
 - The repo stays **pristine and generic** — zero AAA-specific or ExMorbus-specific glue leaks into core modules (verifiable by grep + review).
-- The test suite stays **green and fully offline** (currently 251 passing; CI green on py3.11/3.12 with no API keys).
+- The test suite stays **green and fully offline** (currently 290 passing; CI green on py3.11/3.12 with no API keys).
 - Consumers integrate via the stable seams (package import + JSONL bridge) **without forking** core contracts.
 
 **Non-goals (explicit):**
@@ -185,7 +185,7 @@ phase's success criteria are met. Phase definitions live in `docs/architecture.m
 
 ---
 
-*Maintained by: Brandt Pileggi. Last updated: 2026-06-29.*
+*Maintained by: Brandt Pileggi. Last updated: 2026-06-30.*
 *Architecture decisions: `docs/decision-log.md` | Discovery log: `docs/discovery-log.md`*
 </content>
 </invoke>

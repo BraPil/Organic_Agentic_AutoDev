@@ -18,7 +18,7 @@ Follow CLAUDE.md §4: orient (`git status && git log --oneline -5`) → confirm 
 ## Test command
 
 ```bash
-pytest tests/ -v          # full suite (251 tests, ~2s, fully offline)
+pytest tests/ -v          # full suite (290 tests, ~5s, fully offline)
 pytest tests/ -v -k NAME  # focused
 ```
 
