@@ -46,30 +46,43 @@ shell (`mouseion/contracts.py`, `domain/exmorbus/contracts.py`) — changing the
 
 ---
 
-## The wiki lifecycle: ingest / query / lint (Phase 1, building)
+## The wiki lifecycle: ingest / query / lint (Phase 1)
 
-Three operations, each offline-testable via the deterministic provider:
+Three operations, each offline-testable via the deterministic provider. Code lives in
+`organic_agentic_autodev/knowledge_wiki/` (`KnowledgeWiki` orchestrator + a `WikiCognition`
+synthesis seam with `DeterministicWikiCognition` default and `LLMWikiCognition` live impl).
+Demo: `examples/knowledge_wiki_demo.py`.
 
-### Ingest
-A new raw source triggers wiki maintenance across the related pages/records:
-- synthesize the source into the wiki layer (don't just store it verbatim),
-- cross-reference it against existing records (link related knowledge),
-- detect contradictions with what's already known and flag/reconcile them,
-- preserve provenance back to the immutable source.
+### Ingest — ✅ implemented (P1.2)
+`KnowledgeWiki.ingest(source)` triggers wiki maintenance across the related pages:
+- stores the raw source immutably as a `KnowledgeRecordV0` tagged `wiki:source`,
+- synthesizes it into the wiki layer (a `WikiPage`, not a verbatim copy) — the cognition layer
+  decides the page ops; the orchestrator only applies them,
+- cross-references it against existing pages (links by title/slug match),
+- detects contradictions (same claim key, different value) and **surfaces them, keeping the
+  existing value pending review** — never a silent overwrite,
+- snapshots each page version to a `KnowledgeRecordV0` tagged `wiki:page` with provenance back to
+  its sources.
 
-### Query
-A question retrieves relevant wiki pages/records rather than re-deriving from raw sources each time.
-**A valuable answer is promoted into a new wiki entry** instead of disappearing into chat history —
-this is the "compounding" mechanism: the knowledge base gets richer with use.
+### Query — ✅ implemented (P1.3)
+`KnowledgeWiki.query(question)` retrieves the relevant pages (deterministic weighted token overlap —
+title 3×, claims 2×, body 1× — in `retrieval.py`; vector retrieval is the Phase 2 swap behind the
+same signature) and composes an answer from them. **A grounded answer is promoted into the durable
+store** (tagged `wiki:answer`, with provenance to the sources it drew on) instead of vanishing into
+chat history — the "compounding" mechanism. `promote=False` opts out; an ungrounded question (no
+matching page) is never promoted.
 
-### Lint
-Periodic health check over the wiki layer, surfacing:
-- **staleness** — records whose sources have moved on,
-- **orphans** — entries nothing links to,
-- **contradictions** — records that disagree,
-- **missing concepts** — gaps implied by the sources but not yet written.
+### Lint — ✅ implemented (P1.3)
+`KnowledgeWiki.lint()` is a deterministic structural health check over the wiki layer, surfacing:
+- **orphans** — pages disconnected from the link graph (only flagged when >1 page),
+- **dangling links** — links pointing at a slug with no page,
+- **missing concepts** — the unique referenced-but-absent slugs (Karpathy's "missing concepts"),
+- **contradictions** — the accumulated unresolved-conflict log,
+- **stubs** — under-developed pages (no claims + short body).
 
-Lint output is measurable (counts per category) and feeds `docs/evaluation.md` SLIs.
+`LintReport.healthy`/`summary()` make the result measurable (counts per category) for
+`docs/evaluation.md` SLIs. *Wall-clock staleness is deferred* — it needs a tick/version baseline, and
+lint must stay deterministic.
 
 ---
 

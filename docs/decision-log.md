@@ -54,4 +54,24 @@ Format: `### YYYY-MM-DD — <title>` · **Decision** · **Why** · **Consequence
 **Why:** OAA's Mouseion is already an LLM-curated, compounding knowledge substrate; the pattern gives it a disciplined ingest/query/lint lifecycle and a shared vocabulary. It also formalizes how this repo's own `docs/` are maintained (LLM does the bookkeeping; human curates sources and asks questions).
 
 **Consequences:** Phase 1 work must keep the build offline-testable via the deterministic provider. The pattern governs both the runtime knowledge layer and the docs-tracking discipline going forward. Companion-doc set created this session to support tracking.
+
+---
+
+### 2026-06-29 — Knowledge-wiki ingest (P1.2): design choices
+
+**Decision:** Implement `ingest` in a new self-contained `organic_agentic_autodev/knowledge_wiki/` package with these choices: (1) **no shell changes** — wiki pages persist as existing `KnowledgeRecordV0` (tags `wiki:source` for immutable sources, `wiki:page` for page snapshots with provenance refs); no new `EventKind`, no `contracts.py` edits, no changes to existing `__init__` exports. (2) **Synthesis lives in a `WikiCognition` seam**, not the orchestrator — `KnowledgeWiki` only applies `PageOp`s and persists (thin orchestrator). (3) **`DeterministicWikiCognition` is the default**; `LLMWikiCognition` wraps the bridge `CognitionProvider` and falls back to deterministic on any failure. (4) **Contradiction policy = flag-and-keep**: a conflicting claim (same key, different value) is surfaced in `IngestResult` + an accumulated log and the *existing* value is preserved — never silently overwritten.
+
+**Why:** Honors the pristine-core / additive-flesh rule and the offline-first mandate (22 tests, no API key). The cognition seam keeps the orchestrator from becoming a fat transformer (anti-pattern). Flag-and-keep is the conservative choice: resolution belongs to a human or to the upcoming `lint`/`query` phase, not to a blind last-writer-wins overwrite.
+
+**Consequences:** P1.3 `lint` already has its inputs (the contradiction log + page link graph). If flag-and-keep proves too conservative (stale pages persist), revisit with a confidence- or recency-based resolver and record a superseding entry. Page snapshots are append-only per version (provenance history); acceptable bloat for now.
+
+---
+
+### 2026-06-29 — Knowledge-wiki query + lint (P1.3): design choices
+
+**Decision:** Complete Phase 1 with `query` and `lint`. (1) **Retrieval is deterministic lexical overlap** (`retrieval.relevance`: title 3×, claims 2×, body 1×, normalized by question-token count) in a separate pure module — keeping ranking testable and the orchestrator thin; vector retrieval is a Phase 2 swap behind the same signature. (2) **Grounded answers are promoted** into the Mouseion as `wiki:answer` `KnowledgeRecordV0` with provenance to the sources the answer drew on; ungrounded questions (no page match) are never promoted; `promote=False` opts out. (3) **Lint is structural and deterministic** — orphans (only when >1 page), dangling links, missing concepts, the contradiction log, and stubs. Wall-clock staleness is deferred (it would make lint non-deterministic, violating the no-wall-clock-in-logic invariant; it needs a tick/version baseline). (4) `answer()` added to the `WikiCognition` ABC with a shared deterministic composer + an LLM path that falls back on failure.
+
+**Why:** Honors offline-first + determinism (39 wiki tests total, no API key) and the thin-orchestrator rule. Promotion realizes Karpathy's "valuable answers compound" without polluting the page namespace (answers are durable records, not navigable pages). Deferring wall-clock staleness keeps lint honest rather than shipping a non-reproducible check.
+
+**Consequences:** Phase 1 (ingest/query/lint) is COMPLETE. Phase 2 candidates: real vector retrieval behind `relevance`, a Postgres backend, and surfacing `lint` health as an observability SLI. Promoted answers are not yet re-retrieved by `query` (retrieval is over pages only) — a future enhancement if answer-reuse proves valuable.
 </content>

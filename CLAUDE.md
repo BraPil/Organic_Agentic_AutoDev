@@ -35,7 +35,7 @@
 
 **Success looks like:**
 - The repo stays **pristine and generic** — zero AAA-specific or ExMorbus-specific glue leaks into core modules (verifiable by grep + review).
-- The test suite stays **green and fully offline** (currently 251 passing; CI green on py3.11/3.12 with no API keys).
+- The test suite stays **green and fully offline** (currently 290 passing; CI green on py3.11/3.12 with no API keys).
 - Consumers integrate via the stable seams (package import + JSONL bridge) **without forking** core contracts.
 
 **Non-goals (explicit):**
@@ -166,24 +166,26 @@ Full protected-path list and ownership: `docs/governance.md`.
 
 ```
 Phase 0 — Foundation (substrate→evolution, 5 features, cognition bridge)   ✅ COMPLETE
-Phase 1 — Compounding Knowledge Wiki (Karpathy ingest/query/lint)          🔄 IN PROGRESS  ← current
-Phase 2 — Knowledge Scale & Retrieval (FAISS/Qdrant, Postgres backend)     ⬜ NOT STARTED
+Phase 1 — Compounding Knowledge Wiki (Karpathy ingest/query/lint)          ✅ COMPLETE
+Phase 2 — Knowledge Scale & Retrieval (FAISS/Qdrant, Postgres backend)     ⬜ NOT STARTED  ← next
 Phase 3 — Cognition Depth (LLM cognition inside autoresearch proposals)    ⬜ NOT STARTED
 Phase 4 — Distributed Hardening (multi-machine deploy)                     ⬜ NOT STARTED
 Phase 5 — Domain Grounding & Consumer Integration (deeper ExMorbus, APIs)  ⬜ NOT STARTED
 ```
 
-**Current phase priorities (Phase 1):**
-1. [P1.1] Author the load-bearing **schema doc** (`docs/knowledge.md`) defining wiki conventions and the ingest/query/lint workflows. *(seeded by this setup session)*
-2. [P1.2] Implement **ingest** over the Mouseion knowledge layer: new sources trigger LLM-maintained wiki-page updates with cross-referencing + contradiction detection. Offline-testable via deterministic provider.
-3. [P1.3] Implement **query** (answers retrieved from wiki, valuable answers promoted to new entries) and **lint** (detect staleness, orphans, contradictions, missing concepts).
+**Phase 1 — complete** (`knowledge_wiki/`, 39 offline tests):
+1. [P1.1] ✅ Load-bearing **schema doc** (`docs/knowledge.md`).
+2. [P1.2] ✅ **ingest** — sources stored immutably, synthesized into wiki pages with cross-referencing + contradiction detection, page snapshots persisted with provenance.
+3. [P1.3] ✅ **query** (relevant pages retrieved, grounded answers promoted to the durable store with provenance) + **lint** (orphans, dangling links, missing concepts, contradictions, stubs).
+
+**Phase 2 candidate priorities (next):** real FAISS/Qdrant vector retrieval behind `retrieval.relevance`; Postgres `KnowledgeBackend`; wire `query`/`lint` into an SLI in the observability tracker. (Confirm scope before starting.)
 
 **Phase discipline:** do not implement features belonging to a later phase until the current
 phase's success criteria are met. Phase definitions live in `docs/architecture.md`.
 
 ---
 
-*Maintained by: Brandt Pileggi. Last updated: 2026-06-29.*
+*Maintained by: Brandt Pileggi. Last updated: 2026-06-30.*
 *Architecture decisions: `docs/decision-log.md` | Discovery log: `docs/discovery-log.md`*
 </content>
 </invoke>
